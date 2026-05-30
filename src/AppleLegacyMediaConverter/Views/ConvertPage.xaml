@@ -171,7 +171,7 @@
                                 <Grid Padding="12" ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="2*" />
-                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="156" />
                                         <ColumnDefinition Width="120" />
                                         <ColumnDefinition Width="140" />
                                         <ColumnDefinition Width="120" />
@@ -201,6 +201,9 @@
                                         </Button>
                                         <Button Tag="{Binding}" Click="OpenOutput_Click">
                                             <SymbolIcon Symbol="OpenLocal" />
+                                        </Button>
+                                        <Button Tag="{Binding}" Click="CopyItemError_Click">
+                                            <SymbolIcon Symbol="Copy" />
                                         </Button>
                                     </StackPanel>
                                 </Grid>

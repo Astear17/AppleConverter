@@ -24,6 +24,7 @@ public sealed partial class VideoConverterService : IVideoConverterService
         var args = new[]
         {
             "-hide_banner",
+            "-nostdin",
             "-y",
             "-i",
             job.SourceItem.SourcePath,
@@ -57,6 +58,7 @@ public sealed partial class VideoConverterService : IVideoConverterService
         var args = new[]
         {
             "-hide_banner",
+            "-nostdin",
             "-y",
             "-i",
             job.SourceItem.SourcePath,
@@ -80,6 +82,7 @@ public sealed partial class VideoConverterService : IVideoConverterService
         var args = new[]
         {
             "-hide_banner",
+            "-nostdin",
             "-y",
             "-i",
             job.SourceItem.SourcePath,
@@ -101,6 +104,7 @@ public sealed partial class VideoConverterService : IVideoConverterService
         var args = new[]
         {
             "-hide_banner",
+            "-nostdin",
             "-y",
             "-i",
             job.SourceItem.SourcePath,
@@ -129,14 +133,15 @@ public sealed partial class VideoConverterService : IVideoConverterService
         progress?.Report(2);
 
         using var process = new Process();
-        process.StartInfo = new ProcessStartInfo
-        {
-            FileName = ffmpegPath,
-            UseShellExecute = false,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            CreateNoWindow = true
-        };
+            process.StartInfo = new ProcessStartInfo
+            {
+                FileName = ffmpegPath,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                CreateNoWindow = true,
+                WorkingDirectory = Path.GetDirectoryName(ffmpegPath) ?? AppContext.BaseDirectory
+            };
 
         foreach (var argument in arguments)
         {
@@ -197,15 +202,82 @@ public sealed partial class VideoConverterService : IVideoConverterService
 
         await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
         await Task.WhenAll(stdoutTask, stderrTask).ConfigureAwait(false);
+        var stdout = await stdoutTask.ConfigureAwait(false);
 
         if (process.ExitCode != 0)
         {
+            var stderr = errorBuilder.ToString();
+            var details = BuildFFmpegDetails(ffmpegPath, arguments, process.ExitCode, stdout, stderr);
             throw new MediaConversionException(
-                "FFmpeg could not convert this video. It may be corrupt, unsupported, or blocked by permissions.",
-                errorBuilder.ToString());
+                CreateFFmpegUserMessage(stderr),
+                details);
         }
 
         progress?.Report(100);
+    }
+
+    private static string BuildFFmpegDetails(
+        string ffmpegPath,
+        IReadOnlyList<string> arguments,
+        int exitCode,
+        string stdout,
+        string stderr)
+    {
+        return string.Join(
+            Environment.NewLine,
+            "FFmpeg failed.",
+            $"Exit code: {exitCode}",
+            $"Executable: {ffmpegPath}",
+            $"Arguments: {FormatArguments(arguments)}",
+            string.Empty,
+            "stdout:",
+            string.IsNullOrWhiteSpace(stdout) ? "(empty)" : stdout.Trim(),
+            string.Empty,
+            "stderr:",
+            string.IsNullOrWhiteSpace(stderr) ? "(empty)" : stderr.Trim());
+    }
+
+    private static string CreateFFmpegUserMessage(string stderr)
+    {
+        var lower = stderr.ToLowerInvariant();
+        if (lower.Contains("unknown encoder 'libx264'", StringComparison.Ordinal))
+        {
+            return "This FFmpeg build does not include the H.264 encoder needed for compatible MP4 output.";
+        }
+
+        if (lower.Contains("permission denied", StringComparison.Ordinal))
+        {
+            return "FFmpeg could not write to the output folder. Check folder permissions or choose another output folder.";
+        }
+
+        if (lower.Contains("no space left", StringComparison.Ordinal) || lower.Contains("not enough space", StringComparison.Ordinal))
+        {
+            return "The output drive does not have enough free space.";
+        }
+
+        if (lower.Contains("invalid data found", StringComparison.Ordinal) || lower.Contains("moov atom not found", StringComparison.Ordinal))
+        {
+            return "FFmpeg could not read this video. It may be corrupt or incomplete.";
+        }
+
+        var lastUsefulLine = stderr
+            .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
+            .Select(static line => line.Trim())
+            .LastOrDefault(static line =>
+                !line.StartsWith("frame=", StringComparison.OrdinalIgnoreCase) &&
+                !line.StartsWith("size=", StringComparison.OrdinalIgnoreCase));
+
+        return string.IsNullOrWhiteSpace(lastUsefulLine)
+            ? "FFmpeg could not convert this video. Copy error details for the full backend log."
+            : $"FFmpeg could not convert this video: {lastUsefulLine}";
+    }
+
+    private static string FormatArguments(IReadOnlyList<string> arguments)
+    {
+        return string.Join(" ", arguments.Select(static argument =>
+            argument.Contains(' ', StringComparison.Ordinal) || argument.Contains('"', StringComparison.Ordinal)
+                ? $"\"{argument.Replace("\"", "\\\"", StringComparison.Ordinal)}\""
+                : argument));
     }
 
     private static TimeSpan? TryParseDuration(string line)

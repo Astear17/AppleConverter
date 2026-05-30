@@ -17,6 +17,7 @@ The app is built with C#, .NET 8, WinUI 3, and Windows App SDK. The core convers
 - Output folder selection, same-folder output, folder structure preservation, flattening, and collision behavior.
 - Settings page for theme, default formats, JPEG quality, PNG compression, metadata handling, timestamps, concurrency, folder scanning, FFmpeg path, and logs.
 - Backend status page with copyable diagnostics.
+- Self-contained installer packaging with bundled FFmpeg support.
 - Local JSON settings and local log files.
 - GitHub Actions build and draft release workflows.
 
@@ -53,7 +54,7 @@ Screenshots placeholder. Add current UI images before publishing the first publi
 
 ## Build locally
 
-Requirements:
+Requirements for development:
 
 - Windows 10 19041+ or Windows 11
 - .NET 8 SDK
@@ -79,8 +80,19 @@ dotnet run --project src\AppleLegacyMediaConverter\AppleLegacyMediaConverter.csp
 
 ```powershell
 cd D:\GitHub\AppleConverter
-dotnet publish src\AppleLegacyMediaConverter\AppleLegacyMediaConverter.csproj -c Release -p:Platform=x64 -r win-x64 --self-contained false -o artifacts\publish\AppleConverter
-Compress-Archive -Path artifacts\publish\AppleConverter\* -DestinationPath artifacts\AppleConverter-win-x64.zip -Force
+powershell -ExecutionPolicy Bypass -File scripts\Build-Installer.ps1 -InstallInno
+```
+
+This downloads FFmpeg into `tools\ffmpeg`, publishes a self-contained app, and builds:
+
+```text
+artifacts\installer\AppleConverterSetup-0.1.0-win-x64.exe
+```
+
+To publish the self-contained app folder without compiling the installer:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\Build-Installer.ps1 -SkipInstaller
 ```
 
 ## Backend notes
@@ -93,26 +105,29 @@ Videos use FFmpeg. The app searches for FFmpeg in this order:
 2. `tools\ffmpeg\ffmpeg.exe` next to the app.
 3. `ffmpeg.exe` on the system `PATH`.
 
-FFmpeg binaries are not committed to this repository. Bundle a license-compatible FFmpeg build for distribution, or direct users to set the path in Settings.
+FFmpeg binaries are not committed to this repository. `scripts\Get-FFmpeg.ps1` downloads a Windows FFmpeg build and places `ffmpeg.exe` and `ffprobe.exe` under `tools\ffmpeg`; published and installer builds copy that folder into the app. The default script URL uses a GPL FFmpeg build, so review FFmpeg licensing and add third-party notices before public distribution.
+
+The WinUI app project sets `WindowsAppSDKSelfContained=true`, and installer publishing uses `--self-contained true`, so release builds carry the Windows App SDK files and .NET runtime files beside the app executable.
 
 ## GitHub Actions
 
-`build.yml` runs on pushes to `main`, pull requests to `main`, and manual dispatch. It restores, builds Release x64, runs tests, publishes the app, and uploads an artifact named with the app version and commit hash.
+`build.yml` runs on pushes to `main`, pull requests to `main`, and manual dispatch. It restores, builds Release, runs tests, downloads FFmpeg, publishes the app self-contained, and uploads an artifact named with the app version and commit hash.
 
-`release-draft.yml` runs on pushes to `main` and manual dispatch. It restores, builds, tests, publishes, zips the app, and creates or updates a draft GitHub Release with `softprops/action-gh-release@v2`. The release is always draft and prerelease; it is not published automatically.
+`release-draft.yml` runs on pushes to `main` and manual dispatch. It restores, builds, tests, installs Inno Setup, downloads FFmpeg, publishes, builds an `.exe` installer, zips the app folder, and creates or updates a draft GitHub Release with `softprops/action-gh-release@v2`. The release is always draft and prerelease; it is not published automatically.
 
 ## Known limitations
 
-- The MVP does not ship FFmpeg binaries in the repository.
+- FFmpeg is bundled into installer/publish outputs by the build script, but binaries remain excluded from source control.
 - HEIC/HEIF conversion depends on Magick.NET/ImageMagick codec support on the target runtime.
 - Frame extraction collision handling is conservative for sequence patterns.
 - Theme changes are saved immediately and applied on next app launch.
-- The UI is an MVP implementation ready for refinement, screenshots, icons, installer work, and final release polish.
+- The UI is an MVP implementation ready for screenshots, final branding assets, signing, and release polish.
 
 ## Roadmap
 
-- Add signed installer/MSIX packaging.
-- Add bundled FFmpeg acquisition or packaging flow with license review.
+- Add code signing for the installer.
+- Add optional MSIX/MSIXBundle packaging.
+- Add FFmpeg license display and third-party notices before public release.
 - Add thumbnail previews and richer per-file details.
 - Add per-Live-Photo group controls in the queue.
 - Add ffprobe-based duration detection before conversion starts.

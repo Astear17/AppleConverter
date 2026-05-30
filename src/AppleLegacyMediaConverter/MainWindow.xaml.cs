@@ -1,6 +1,8 @@
 using AppleLegacyMediaConverter.Views;
 using AppleLegacyMediaConverter.Core.Models;
 using AppleLegacyMediaConverter.Models;
+using Microsoft.UI;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Media;
@@ -13,6 +15,7 @@ public sealed partial class MainWindow : Window
     {
         InitializeComponent();
         AppWindow.Resize(new Windows.Graphics.SizeInt32(1200, 780));
+        ConfigureWindowChrome();
 
         try
         {
@@ -33,6 +36,29 @@ public sealed partial class MainWindow : Window
 
         RootNavigation.SelectedItem = ConvertNavItem;
         ContentFrame.Navigate(typeof(ConvertPage));
+    }
+
+    private void ConfigureWindowChrome()
+    {
+        Title = "Apple Converter";
+        var iconPath = Path.Combine(AppContext.BaseDirectory, "Assets", "AppIcon.ico");
+        if (File.Exists(iconPath))
+        {
+            AppWindow.SetIcon(iconPath);
+        }
+
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+
+        if (AppWindowTitleBar.IsCustomizationSupported())
+        {
+            var titleBar = AppWindow.TitleBar;
+            titleBar.ExtendsContentIntoTitleBar = true;
+            titleBar.ButtonBackgroundColor = Colors.Transparent;
+            titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+            titleBar.ButtonHoverBackgroundColor = ColorHelper.FromArgb(28, 128, 128, 128);
+            titleBar.ButtonPressedBackgroundColor = ColorHelper.FromArgb(42, 128, 128, 128);
+        }
     }
 
     private void RootNavigation_SelectionChanged(NavigationView sender, NavigationViewSelectionChangedEventArgs args)

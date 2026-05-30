@@ -121,6 +121,24 @@ public sealed partial class ConvertPage : Page
         }
     }
 
+    private void CopyItemError_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: MediaFileItem item })
+        {
+            return;
+        }
+
+        var text = string.Join(
+            Environment.NewLine,
+            item.FileName,
+            item.SourcePath,
+            item.ErrorMessage ?? "No user-facing error.",
+            item.TechnicalDetails ?? "No technical details.");
+        var package = new DataPackage();
+        package.SetText(text);
+        Clipboard.SetContent(package);
+    }
+
     private void OpenOutputFolder_Click(object sender, RoutedEventArgs e)
     {
         var completed = ViewModel.Queue.FirstOrDefault(item => item.Status == ConversionStatus.Completed && !string.IsNullOrWhiteSpace(item.OutputPath));

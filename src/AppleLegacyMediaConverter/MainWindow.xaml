@@ -7,42 +7,71 @@
     mc:Ignorable="d"
     Title="Apple Converter">
 
-    <NavigationView
-        x:Name="RootNavigation"
-        IsBackButtonVisible="Collapsed"
-        IsSettingsVisible="False"
-        PaneDisplayMode="Left"
-        SelectionChanged="RootNavigation_SelectionChanged">
-        <NavigationView.Header>
-            <TextBlock Text="Apple Converter" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,0,8" />
-        </NavigationView.Header>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="48" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
 
-        <NavigationView.MenuItems>
-            <NavigationViewItem x:Name="ConvertNavItem" Content="Convert" Tag="convert">
-                <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Upload" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="Backend status" Tag="backend">
-                <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Repair" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.MenuItems>
+        <Grid
+            x:Name="AppTitleBar"
+            Padding="16,0,140,0"
+            ColumnSpacing="10"
+            Background="Transparent">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Image
+                Width="24"
+                Height="24"
+                Source="ms-appx:///Assets/AppIcon.png"
+                VerticalAlignment="Center" />
+            <TextBlock
+                Grid.Column="1"
+                Text="Apple Converter"
+                VerticalAlignment="Center"
+                FontWeight="SemiBold" />
+        </Grid>
 
-        <NavigationView.FooterMenuItems>
-            <NavigationViewItem Content="Settings" Tag="settings">
-                <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Setting" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-            <NavigationViewItem Content="About" Tag="about">
-                <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Help" />
-                </NavigationViewItem.Icon>
-            </NavigationViewItem>
-        </NavigationView.FooterMenuItems>
+        <NavigationView
+            x:Name="RootNavigation"
+            Grid.Row="1"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="False"
+            PaneDisplayMode="Left"
+            SelectionChanged="RootNavigation_SelectionChanged">
+            <NavigationView.Header>
+                <TextBlock Text="Apple Converter" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,0,0,8" />
+            </NavigationView.Header>
 
-        <Frame x:Name="ContentFrame" />
-    </NavigationView>
+            <NavigationView.MenuItems>
+                <NavigationViewItem x:Name="ConvertNavItem" Content="Convert" Tag="convert">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Upload" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Backend status" Tag="backend">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Repair" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.MenuItems>
+
+            <NavigationView.FooterMenuItems>
+                <NavigationViewItem Content="Settings" Tag="settings">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Setting" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="About" Tag="about">
+                    <NavigationViewItem.Icon>
+                        <SymbolIcon Symbol="Help" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+            </NavigationView.FooterMenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+    </Grid>
 </Window>

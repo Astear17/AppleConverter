@@ -45,18 +45,20 @@ jobs:
       - name: Test
         run: dotnet test src/AppleLegacyMediaConverter.Tests/AppleLegacyMediaConverter.Tests.csproj --configuration Release --verbosity normal
 
-      - name: Publish app
-        run: dotnet publish src/AppleLegacyMediaConverter/AppleLegacyMediaConverter.csproj --configuration Release -p:Platform=x64 -r win-x64 --self-contained false -o artifacts/publish/AppleConverter
+      - name: Install Inno Setup
+        run: choco install innosetup --yes --no-progress
 
-      - name: Package zip
+      - name: Build self-contained app and installer
         id: package
         shell: pwsh
         run: |
+          ./scripts/Build-Installer.ps1
           New-Item -ItemType Directory -Path artifacts/release -Force | Out-Null
-          Copy-Item README.md artifacts/publish/AppleConverter/README.md
           $zip = "artifacts/release/AppleConverter-${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.short_sha }}-win-x64.zip"
           Compress-Archive -Path artifacts/publish/AppleConverter/* -DestinationPath $zip -Force
+          $installer = Get-ChildItem artifacts/installer -Filter *.exe | Select-Object -First 1
           "zip=$zip" >> $env:GITHUB_OUTPUT
+          "installer=$($installer.FullName)" >> $env:GITHUB_OUTPUT
 
       - name: Create or update draft release
         uses: softprops/action-gh-release@v2
@@ -67,4 +69,6 @@ jobs:
           draft: true
           prerelease: true
           generate_release_notes: true
-          files: ${{ steps.package.outputs.zip }}
+          files: |
+            ${{ steps.package.outputs.zip }}
+            ${{ steps.package.outputs.installer }}

@@ -40,8 +40,12 @@ jobs:
       - name: Test
         run: dotnet test src/AppleLegacyMediaConverter.Tests/AppleLegacyMediaConverter.Tests.csproj --configuration Release --verbosity normal
 
+      - name: Download FFmpeg backend
+        shell: pwsh
+        run: ./scripts/Get-FFmpeg.ps1
+
       - name: Publish app
-        run: dotnet publish src/AppleLegacyMediaConverter/AppleLegacyMediaConverter.csproj --configuration Release -p:Platform=x64 -r win-x64 --self-contained false -o artifacts/publish/AppleConverter
+        run: dotnet publish src/AppleLegacyMediaConverter/AppleLegacyMediaConverter.csproj --configuration Release -p:Platform=x64 -p:WindowsAppSDKSelfContained=true -r win-x64 --self-contained true -o artifacts/publish/AppleConverter
 
       - name: Add release notes
         shell: pwsh
@@ -52,6 +56,6 @@ jobs:
       - name: Upload build artifact
         uses: actions/upload-artifact@v4
         with:
-          name: AppleConverter-${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.short_sha }}
+          name: AppleConverter-${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.short_sha }}-win-x64-self-contained
           path: artifacts/publish/AppleConverter
           if-no-files-found: error
