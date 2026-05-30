@@ -33,6 +33,8 @@ public sealed class MediaFileItem : INotifyPropertyChanged
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public Action<Action>? NotificationDispatcher { get; set; }
+
     public Guid Id { get; }
 
     public string SourcePath { get; }
@@ -188,6 +190,19 @@ public sealed class MediaFileItem : INotifyPropertyChanged
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        var handler = PropertyChanged;
+        if (handler is null)
+        {
+            return;
+        }
+
+        var args = new PropertyChangedEventArgs(propertyName);
+        if (NotificationDispatcher is { } dispatcher)
+        {
+            dispatcher(() => handler(this, args));
+            return;
+        }
+
+        handler(this, args);
     }
 }

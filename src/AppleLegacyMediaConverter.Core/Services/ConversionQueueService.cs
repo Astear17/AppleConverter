@@ -140,7 +140,7 @@ public sealed class ConversionQueueService : IConversionQueueService
                 }
                 catch (Exception ex)
                 {
-                    item.MarkFailed("The file could not be converted. See error details for more information.", ex.ToString());
+                    item.MarkFailed(CreateUnexpectedFailureMessage(ex), ex.ToString());
                     await _logger.LogErrorAsync($"Unexpected conversion failure for {item.SourcePath}", ex, CancellationToken.None)
                         .ConfigureAwait(false);
                     Report(item, progress, Interlocked.Increment(ref finishedInThisRun), total, 0);
@@ -317,5 +317,12 @@ public sealed class ConversionQueueService : IConversionQueueService
             items.Count(static item => item.Status == ConversionStatus.Skipped),
             items.Count(static item => item.Status == ConversionStatus.Cancelled),
             options.OutputFolderMode == OutputFolderMode.CustomFolder ? options.CustomOutputFolder : null);
+    }
+
+    private static string CreateUnexpectedFailureMessage(Exception exception)
+    {
+        return string.IsNullOrWhiteSpace(exception.Message)
+            ? "The file could not be converted. Copy error details for the technical exception."
+            : $"The file could not be converted: {exception.Message}";
     }
 }

@@ -6,6 +6,7 @@ using AppleLegacyMediaConverter.Core.Interfaces;
 using AppleLegacyMediaConverter.Core.Models;
 using AppleLegacyMediaConverter.Helpers;
 using AppleLegacyMediaConverter.Models;
+using Microsoft.UI.Dispatching;
 
 namespace AppleLegacyMediaConverter.ViewModels;
 
@@ -14,6 +15,7 @@ public sealed partial class ConvertViewModel : ObservableObject
     private readonly IConversionQueueService _queueService;
     private readonly ISettingsService _settingsService;
     private readonly ApplicationState _state;
+    private readonly DispatcherQueue _dispatcherQueue;
     private CancellationTokenSource? _conversionCancellation;
     private bool _suppressSettingsSave;
 
@@ -25,6 +27,7 @@ public sealed partial class ConvertViewModel : ObservableObject
         _queueService = queueService;
         _settingsService = settingsService;
         _state = state;
+        _dispatcherQueue = DispatcherQueue.GetForCurrentThread();
         Settings = _state.Settings;
 
         if (string.IsNullOrWhiteSpace(Settings.CustomOutputFolder))
@@ -196,6 +199,7 @@ public sealed partial class ConvertViewModel : ObservableObject
             var added = await _queueService.AddInputsAsync(paths, Settings).ConfigureAwait(true);
             foreach (var item in added)
             {
+                item.NotificationDispatcher = Dispatch;
                 item.PropertyChanged += OnQueueItemPropertyChanged;
                 Queue.Add(item);
             }
@@ -245,8 +249,11 @@ public sealed partial class ConvertViewModel : ObservableObject
 
         var progress = new Progress<ConversionProgressUpdate>(update =>
         {
-            TotalProgress = update.TotalProgress;
-            RefreshFilter();
+            Dispatch(() =>
+            {
+                TotalProgress = update.TotalProgress;
+                RefreshFilter();
+            });
         });
 
         try
@@ -385,8 +392,22 @@ public sealed partial class ConvertViewModel : ObservableObject
 
     private void OnQueueItemPropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
-        UpdateSummary();
-        NotifyQueueDependentProperties();
+        Dispatch(() =>
+        {
+            UpdateSummary();
+            NotifyQueueDependentProperties();
+        });
+    }
+
+    private void Dispatch(Action action)
+    {
+        if (_dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return;
+        }
+
+        _dispatcherQueue.TryEnqueue(() => action());
     }
 
     private void SaveSettingsFireAndForget()
