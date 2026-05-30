@@ -1,0 +1,70 @@
+name: Draft Release
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  draft-release:
+    name: Build and draft release
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Compute metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          [xml]$props = Get-Content Directory.Build.props
+          $version = $props.Project.PropertyGroup.Version
+          $tag = "v$version-dev-$shortSha"
+          $title = "Apple Legacy Media Converter v$version-dev+$shortSha"
+          "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "tag=$tag" >> $env:GITHUB_OUTPUT
+          "title=$title" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore AppleConverter.sln
+
+      - name: Build
+        run: dotnet build AppleConverter.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test src/AppleLegacyMediaConverter.Tests/AppleLegacyMediaConverter.Tests.csproj --configuration Release --verbosity normal
+
+      - name: Publish app
+        run: dotnet publish src/AppleLegacyMediaConverter/AppleLegacyMediaConverter.csproj --configuration Release -p:Platform=x64 -r win-x64 --self-contained false -o artifacts/publish/AppleConverter
+
+      - name: Package zip
+        id: package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Path artifacts/release -Force | Out-Null
+          Copy-Item README.md artifacts/publish/AppleConverter/README.md
+          $zip = "artifacts/release/AppleConverter-${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.short_sha }}-win-x64.zip"
+          Compress-Archive -Path artifacts/publish/AppleConverter/* -DestinationPath $zip -Force
+          "zip=$zip" >> $env:GITHUB_OUTPUT
+
+      - name: Create or update draft release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.meta.outputs.tag }}
+          name: ${{ steps.meta.outputs.title }}
+          target_commitish: ${{ github.sha }}
+          draft: true
+          prerelease: true
+          generate_release_notes: true
+          files: ${{ steps.package.outputs.zip }}

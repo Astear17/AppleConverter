@@ -1,0 +1,22 @@
+bin/
+obj/
+.vs/
+.vscode/
+TestResults/
+artifacts/
+publish/
+*.user
+*.suo
+*.nupkg
+*.snupkg
+*.log
+*.zip
+
+# Local media and backend binaries
+samples/
+tools/ffmpeg/ffmpeg.exe
+tools/ffmpeg/ffprobe.exe
+
+# OS noise
+Thumbs.db
+Desktop.ini

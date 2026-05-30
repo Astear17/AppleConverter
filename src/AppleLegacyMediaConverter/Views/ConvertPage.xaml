@@ -1,0 +1,287 @@
+<Page
+    x:Class="AppleLegacyMediaConverter.Views.ConvertPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:core="using:AppleLegacyMediaConverter.Core.Models"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid Padding="24" RowSpacing="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <Grid ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                AllowDrop="True"
+                DragOver="DropZone_DragOver"
+                Drop="DropZone_Drop"
+                Padding="28"
+                CornerRadius="8"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Grid RowSpacing="16">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Drop Apple media here" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Files and folders from iPhone, iPad, macOS, AirDrop, or iCloud" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                        <Button Click="AddFiles_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="Add" />
+                                <TextBlock Text="Add Files" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="AddFolder_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="Folder" />
+                                <TextBlock Text="Add Folder" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <Border
+                Grid.Column="1"
+                Padding="20"
+                CornerRadius="8"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Grid RowSpacing="12">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Text="Conversion" Style="{ThemeResource SubtitleTextBlockStyle}" />
+
+                    <StackPanel Grid.Row="1" Spacing="6">
+                        <TextBlock Text="Mode" />
+                        <ComboBox
+                            ItemsSource="{Binding ConversionModeOptions}"
+                            SelectedItem="{Binding SelectedConversionMode, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Spacing="6">
+                        <TextBlock Text="Image output" />
+                        <ComboBox
+                            ItemsSource="{Binding ImageFormatOptions}"
+                            SelectedItem="{Binding SelectedImageFormat, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="3" Spacing="6">
+                        <TextBlock Text="Live Photos" />
+                        <ComboBox
+                            ItemsSource="{Binding LivePhotoActionOptions}"
+                            SelectedItem="{Binding SelectedLivePhotoAction, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12">
+                        <StackPanel Width="140" Spacing="6">
+                            <TextBlock Text="Frame interval" />
+                            <NumberBox
+                                Minimum="1"
+                                Maximum="3600"
+                                SmallChange="1"
+                                SpinButtonPlacementMode="Inline"
+                                Value="{Binding FrameIntervalSeconds, Mode=TwoWay}" />
+                        </StackPanel>
+                        <Button Click="Convert_Click" VerticalAlignment="Bottom" IsEnabled="{Binding HasFiles}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="Play" />
+                                <TextBlock Text="Convert" />
+                            </StackPanel>
+                        </Button>
+                        <Button Command="{Binding CancelConversionCommand}" VerticalAlignment="Bottom" IsEnabled="{Binding IsConverting}">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="Stop" />
+                                <TextBlock Text="Cancel" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <Grid Grid.Row="1" ColumnSpacing="16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border
+                Padding="0"
+                CornerRadius="8"
+                BorderThickness="1"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <Grid RowSpacing="0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid Padding="16" ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="180" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="Queue" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <ComboBox
+                            Grid.Column="1"
+                            ItemsSource="{Binding FilterOptions}"
+                            SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch" />
+                        <Button Grid.Column="2" Command="{Binding RetryFailedCommand}" IsEnabled="{Binding HasFailures}">
+                            <SymbolIcon Symbol="Refresh" />
+                        </Button>
+                        <Button Grid.Column="3" Command="{Binding ClearCompletedCommand}" IsEnabled="{Binding HasCompleted}">
+                            <SymbolIcon Symbol="Clear" />
+                        </Button>
+                        <Button Grid.Column="4" Command="{Binding ClearQueueCommand}" IsEnabled="{Binding HasFiles}">
+                            <SymbolIcon Symbol="Delete" />
+                        </Button>
+                    </Grid>
+
+                    <ListView Grid.Row="1" ItemsSource="{Binding FilteredQueue}" SelectionMode="None">
+                        <ListView.ItemTemplate>
+                            <DataTemplate x:DataType="core:MediaFileItem">
+                                <Grid Padding="12" ColumnSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="2*" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="140" />
+                                        <ColumnDefinition Width="120" />
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="3">
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="{Binding FileName}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <Border
+                                                Width="{Binding LivePhotoBadgeWidth}"
+                                                Padding="6,2"
+                                                CornerRadius="4"
+                                                Background="{ThemeResource AccentFillColorSecondaryBrush}">
+                                                <TextBlock Text="{Binding LivePhotoBadgeText}" FontSize="11" />
+                                            </Border>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding ErrorMessage}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="1" Text="{Binding DisplayType}" TextWrapping="Wrap" />
+                                    <TextBlock Grid.Column="2" Text="{Binding OutputTarget}" TextTrimming="CharacterEllipsis" />
+                                    <StackPanel Grid.Column="3" Spacing="4">
+                                        <TextBlock Text="{Binding Status}" />
+                                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" />
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
+                                        <Button Tag="{Binding}" Click="OpenSource_Click">
+                                            <SymbolIcon Symbol="OpenFile" />
+                                        </Button>
+                                        <Button Tag="{Binding}" Click="OpenOutput_Click">
+                                            <SymbolIcon Symbol="OpenLocal" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
+            </Border>
+
+            <Grid Grid.Column="1" RowSpacing="16">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Border
+                    Padding="20"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Output" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <ComboBox
+                            ItemsSource="{Binding OutputFolderModeOptions}"
+                            SelectedItem="{Binding SelectedOutputFolderMode, Mode=TwoWay}"
+                            HorizontalAlignment="Stretch" />
+                        <Grid ColumnSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBox Text="{Binding CustomOutputFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                            <Button Grid.Column="1" Click="SelectOutputFolder_Click">
+                                <SymbolIcon Symbol="Folder" />
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Grid.Row="1"
+                    Padding="20"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Progress" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <ProgressBar Minimum="0" Maximum="100" Value="{Binding TotalProgress}" />
+                        <TextBlock Text="{Binding StatusText}" />
+                        <TextBlock Text="{Binding SummaryText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <Border
+                    Grid.Row="2"
+                    Padding="20"
+                    CornerRadius="8"
+                    BorderThickness="1"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Summary" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="{Binding LastOutputFolder}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        <Button Click="OpenOutputFolder_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="OpenLocal" />
+                                <TextBlock Text="Open Output Folder" />
+                            </StackPanel>
+                        </Button>
+                        <Button Click="CopyFailedReport_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <SymbolIcon Symbol="Copy" />
+                                <TextBlock Text="Copy Failed Files Report" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Grid>
+    </Grid>
+</Page>

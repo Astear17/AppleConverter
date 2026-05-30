@@ -1,0 +1,17 @@
+<Project>
+  <PropertyGroup>
+    <Company>Apple Converter Contributors</Company>
+    <Product>Apple Converter</Product>
+    <Authors>Apple Converter Contributors</Authors>
+    <Copyright>Copyright (c) Apple Converter Contributors</Copyright>
+    <RepositoryUrl>https://github.com/your-org/AppleConverter</RepositoryUrl>
+    <Version>0.1.0</Version>
+    <AssemblyVersion>0.1.0.0</AssemblyVersion>
+    <FileVersion>0.1.0.0</FileVersion>
+    <InformationalVersion>0.1.0-dev</InformationalVersion>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+</Project>

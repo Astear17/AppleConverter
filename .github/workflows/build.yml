@@ -1,0 +1,57 @@
+name: Build
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build and test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Compute metadata
+        id: meta
+        shell: pwsh
+        run: |
+          $shortSha = "${{ github.sha }}".Substring(0, 7)
+          [xml]$props = Get-Content Directory.Build.props
+          $version = $props.Project.PropertyGroup.Version
+          "short_sha=$shortSha" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
+
+      - name: Restore
+        run: dotnet restore AppleConverter.sln
+
+      - name: Build
+        run: dotnet build AppleConverter.sln --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test src/AppleLegacyMediaConverter.Tests/AppleLegacyMediaConverter.Tests.csproj --configuration Release --verbosity normal
+
+      - name: Publish app
+        run: dotnet publish src/AppleLegacyMediaConverter/AppleLegacyMediaConverter.csproj --configuration Release -p:Platform=x64 -r win-x64 --self-contained false -o artifacts/publish/AppleConverter
+
+      - name: Add release notes
+        shell: pwsh
+        run: |
+          Copy-Item README.md artifacts/publish/AppleConverter/README.md
+          "Apple Converter ${{ steps.meta.outputs.version }} (${{ steps.meta.outputs.short_sha }})" | Out-File artifacts/publish/AppleConverter/RELEASE-NOTES.txt
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: AppleConverter-${{ steps.meta.outputs.version }}-${{ steps.meta.outputs.short_sha }}
+          path: artifacts/publish/AppleConverter
+          if-no-files-found: error
