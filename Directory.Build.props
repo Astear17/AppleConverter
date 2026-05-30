@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
-    <Company>Apple Converter Contributors</Company>
+    <Company>Astear17</Company>
     <Product>Apple Converter</Product>
-    <Authors>Apple Converter Contributors</Authors>
-    <Copyright>Copyright (c) Apple Converter Contributors</Copyright>
-    <RepositoryUrl>https://github.com/your-org/AppleConverter</RepositoryUrl>
+    <Authors>Astear17</Authors>
+    <Copyright>Copyright (c) 2026 Astear17</Copyright>
+    <RepositoryUrl>https://github.com/Astear17/AppleConverter</RepositoryUrl>
     <Version>0.1.0</Version>
     <AssemblyVersion>0.1.0.0</AssemblyVersion>
     <FileVersion>0.1.0.0</FileVersion>

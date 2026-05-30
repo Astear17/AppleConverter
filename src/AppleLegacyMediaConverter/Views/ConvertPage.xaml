@@ -5,126 +5,111 @@
     xmlns:core="using:AppleLegacyMediaConverter.Core.Models"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Grid Padding="24" RowSpacing="16">
+    <Grid Padding="24" RowSpacing="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <Grid ColumnSpacing="16">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
+        <Border
+            AllowDrop="True"
+            DragOver="DropZone_DragOver"
+            Drop="DropZone_Drop"
+            Padding="16"
+            CornerRadius="8"
+            BorderThickness="1"
+            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+            <Grid ColumnSpacing="16" RowSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1.35*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="1.25*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <Border
-                AllowDrop="True"
-                DragOver="DropZone_DragOver"
-                Drop="DropZone_Drop"
-                Padding="28"
-                CornerRadius="8"
-                BorderThickness="1"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <Grid RowSpacing="16">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <StackPanel Spacing="6">
-                        <TextBlock Text="Drop Apple media here" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                        <TextBlock Text="Files and folders from iPhone, iPad, macOS, AirDrop, or iCloud" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
-                    </StackPanel>
-                    <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="8">
+                <StackPanel Spacing="8" VerticalAlignment="Center">
+                    <TextBlock Text="Thả tệp Apple vào đây" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Kéo thả tệp/thư mục hoặc chọn từ máy. Hỗ trợ iPhone, iPad, macOS, AirDrop và iCloud." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
                         <Button Click="AddFiles_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <SymbolIcon Symbol="Add" />
-                                <TextBlock Text="Add Files" />
+                                <TextBlock Text="Thêm tệp" />
                             </StackPanel>
                         </Button>
                         <Button Click="AddFolder_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <SymbolIcon Symbol="Folder" />
-                                <TextBlock Text="Add Folder" />
+                                <TextBlock Text="Thêm thư mục" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Grid>
-            </Border>
+                </StackPanel>
 
-            <Border
-                Grid.Column="1"
-                Padding="20"
-                CornerRadius="8"
-                BorderThickness="1"
-                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                <Grid RowSpacing="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+                <StackPanel Grid.Column="1" Spacing="8" VerticalAlignment="Top">
+                    <TextBlock Text="Hình ảnh" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="HEIC/HEIF và ảnh thường" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ComboBox
+                        ItemsSource="{Binding ImageFormatOptions}"
+                        SelectedItem="{Binding SelectedImageFormat, Mode=TwoWay}"
+                        HorizontalAlignment="Stretch" />
+                    <TextBlock Text="Live Photo" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    <ComboBox
+                        ItemsSource="{Binding LivePhotoActionOptions}"
+                        SelectedItem="{Binding SelectedLivePhotoAction, Mode=TwoWay}"
+                        HorizontalAlignment="Stretch" />
+                </StackPanel>
 
-                    <TextBlock Text="Conversion" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                <StackPanel Grid.Column="2" Spacing="8" VerticalAlignment="Top">
+                    <TextBlock Text="Video" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <ComboBox
+                        ItemsSource="{Binding VideoModeOptions}"
+                        SelectedItem="{Binding SelectedVideoMode, Mode=TwoWay}"
+                        HorizontalAlignment="Stretch" />
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <NumberBox
+                            Width="112"
+                            Minimum="1"
+                            Maximum="3600"
+                            SmallChange="1"
+                            SpinButtonPlacementMode="Inline"
+                            Value="{Binding FrameIntervalSeconds, Mode=TwoWay}" />
+                        <TextBlock
+                            Grid.Column="1"
+                            Text="Khoảng cách khung: lấy 1 ảnh mỗi N giây. Chỉ dùng cho tách khung mỗi N giây."
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            TextWrapping="Wrap" />
+                    </Grid>
+                </StackPanel>
 
-                    <StackPanel Grid.Row="1" Spacing="6">
-                        <TextBlock Text="Mode" />
-                        <ComboBox
-                            ItemsSource="{Binding ConversionModeOptions}"
-                            SelectedItem="{Binding SelectedConversionMode, Mode=TwoWay}"
-                            HorizontalAlignment="Stretch" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="2" Spacing="6">
-                        <TextBlock Text="Image output" />
-                        <ComboBox
-                            ItemsSource="{Binding ImageFormatOptions}"
-                            SelectedItem="{Binding SelectedImageFormat, Mode=TwoWay}"
-                            HorizontalAlignment="Stretch" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="3" Spacing="6">
-                        <TextBlock Text="Live Photos" />
-                        <ComboBox
-                            ItemsSource="{Binding LivePhotoActionOptions}"
-                            SelectedItem="{Binding SelectedLivePhotoAction, Mode=TwoWay}"
-                            HorizontalAlignment="Stretch" />
-                    </StackPanel>
-
-                    <StackPanel Grid.Row="4" Orientation="Horizontal" Spacing="12">
-                        <StackPanel Width="140" Spacing="6">
-                            <TextBlock Text="Frame interval" />
-                            <NumberBox
-                                Minimum="1"
-                                Maximum="3600"
-                                SmallChange="1"
-                                SpinButtonPlacementMode="Inline"
-                                Value="{Binding FrameIntervalSeconds, Mode=TwoWay}" />
-                        </StackPanel>
-                        <Button Click="Convert_Click" VerticalAlignment="Bottom" IsEnabled="{Binding HasFiles}">
+                <StackPanel Grid.Column="3" Spacing="8" VerticalAlignment="Bottom">
+                    <TextBlock Text="Nặng: MP4, tách nhiều khung, tách toàn bộ khung." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" MaxWidth="210" />
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button Click="Convert_Click" IsEnabled="{Binding HasFiles}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <SymbolIcon Symbol="Play" />
-                                <TextBlock Text="Convert" />
+                                <TextBlock Text="Chuyển đổi" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding CancelConversionCommand}" VerticalAlignment="Bottom" IsEnabled="{Binding IsConverting}">
+                        <Button Command="{Binding CancelConversionCommand}" IsEnabled="{Binding IsConverting}">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <SymbolIcon Symbol="Stop" />
-                                <TextBlock Text="Cancel" />
+                                <TextBlock Text="Hủy" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
-                </Grid>
-            </Border>
-        </Grid>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <Grid Grid.Row="1" ColumnSpacing="16">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="2*" />
+                <ColumnDefinition Width="2.35*" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
@@ -140,7 +125,7 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
 
-                    <Grid Padding="16" ColumnSpacing="10">
+                    <Grid Padding="14" ColumnSpacing="10">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="180" />
@@ -148,19 +133,19 @@
                             <ColumnDefinition Width="Auto" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="Queue" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Hàng đợi" Style="{ThemeResource SubtitleTextBlockStyle}" />
                         <ComboBox
                             Grid.Column="1"
                             ItemsSource="{Binding FilterOptions}"
                             SelectedItem="{Binding SelectedFilter, Mode=TwoWay}"
                             HorizontalAlignment="Stretch" />
-                        <Button Grid.Column="2" Command="{Binding RetryFailedCommand}" IsEnabled="{Binding HasFailures}">
+                        <Button Grid.Column="2" Command="{Binding RetryFailedCommand}" IsEnabled="{Binding HasFailures}" ToolTipService.ToolTip="Thử lại tệp lỗi">
                             <SymbolIcon Symbol="Refresh" />
                         </Button>
-                        <Button Grid.Column="3" Command="{Binding ClearCompletedCommand}" IsEnabled="{Binding HasCompleted}">
+                        <Button Grid.Column="3" Command="{Binding ClearCompletedCommand}" IsEnabled="{Binding HasCompleted}" ToolTipService.ToolTip="Xóa tệp đã hoàn tất">
                             <SymbolIcon Symbol="Clear" />
                         </Button>
-                        <Button Grid.Column="4" Command="{Binding ClearQueueCommand}" IsEnabled="{Binding HasFiles}">
+                        <Button Grid.Column="4" Command="{Binding ClearQueueCommand}" IsEnabled="{Binding HasFiles}" ToolTipService.ToolTip="Xóa hàng đợi">
                             <SymbolIcon Symbol="Delete" />
                         </Button>
                     </Grid>
@@ -170,10 +155,10 @@
                             <DataTemplate x:DataType="core:MediaFileItem">
                                 <Grid Padding="12" ColumnSpacing="12">
                                     <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="2*" />
-                                        <ColumnDefinition Width="156" />
-                                        <ColumnDefinition Width="120" />
+                                        <ColumnDefinition Width="2.2*" />
+                                        <ColumnDefinition Width="160" />
                                         <ColumnDefinition Width="140" />
+                                        <ColumnDefinition Width="150" />
                                         <ColumnDefinition Width="120" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="3">
@@ -192,17 +177,17 @@
                                     <TextBlock Grid.Column="1" Text="{Binding DisplayType}" TextWrapping="Wrap" />
                                     <TextBlock Grid.Column="2" Text="{Binding OutputTarget}" TextTrimming="CharacterEllipsis" />
                                     <StackPanel Grid.Column="3" Spacing="4">
-                                        <TextBlock Text="{Binding Status}" />
+                                        <TextBlock Text="{Binding StatusText}" />
                                         <ProgressBar Minimum="0" Maximum="100" Value="{Binding Progress}" />
                                     </StackPanel>
                                     <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="6" HorizontalAlignment="Right">
-                                        <Button Tag="{Binding}" Click="OpenSource_Click">
+                                        <Button Tag="{Binding}" Click="OpenSource_Click" ToolTipService.ToolTip="Mở thư mục nguồn">
                                             <SymbolIcon Symbol="OpenFile" />
                                         </Button>
-                                        <Button Tag="{Binding}" Click="OpenOutput_Click">
+                                        <Button Tag="{Binding}" Click="OpenOutput_Click" ToolTipService.ToolTip="Mở thư mục xuất">
                                             <SymbolIcon Symbol="OpenLocal" />
                                         </Button>
-                                        <Button Tag="{Binding}" Click="CopyItemError_Click">
+                                        <Button Tag="{Binding}" Click="CopyItemError_Click" ToolTipService.ToolTip="Sao chép lỗi">
                                             <SymbolIcon Symbol="Copy" />
                                         </Button>
                                     </StackPanel>
@@ -213,21 +198,21 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Column="1" RowSpacing="16">
+            <Grid Grid.Column="1" RowSpacing="14" VerticalAlignment="Top">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
                 </Grid.RowDefinitions>
 
                 <Border
-                    Padding="20"
+                    Padding="18"
                     CornerRadius="8"
                     BorderThickness="1"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Output" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Đầu ra" Style="{ThemeResource SubtitleTextBlockStyle}" />
                         <ComboBox
                             ItemsSource="{Binding OutputFolderModeOptions}"
                             SelectedItem="{Binding SelectedOutputFolderMode, Mode=TwoWay}"
@@ -247,41 +232,46 @@
 
                 <Border
                     Grid.Row="1"
-                    Padding="20"
+                    Padding="18"
                     CornerRadius="8"
                     BorderThickness="1"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Progress" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <StackPanel Spacing="10">
+                        <TextBlock Text="Tiến trình" Style="{ThemeResource SubtitleTextBlockStyle}" />
                         <ProgressBar Minimum="0" Maximum="100" Value="{Binding TotalProgress}" />
                         <TextBlock Text="{Binding StatusText}" />
+                        <TextBlock Text="{Binding EstimatedTimeText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                         <TextBlock Text="{Binding SummaryText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                     </StackPanel>
                 </Border>
 
                 <Border
                     Grid.Row="2"
-                    Padding="20"
+                    Padding="18"
                     CornerRadius="8"
                     BorderThickness="1"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="10">
-                        <TextBlock Text="Summary" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Tóm tắt" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="{Binding SummaryText}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding SummaryDetailText}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding LastOutputFolder}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
-                        <Button Click="OpenOutputFolder_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <SymbolIcon Symbol="OpenLocal" />
-                                <TextBlock Text="Open Output Folder" />
-                            </StackPanel>
-                        </Button>
-                        <Button Click="CopyFailedReport_Click">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
-                                <SymbolIcon Symbol="Copy" />
-                                <TextBlock Text="Copy Failed Files Report" />
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <Button Click="OpenOutputFolder_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <SymbolIcon Symbol="OpenLocal" />
+                                    <TextBlock Text="Mở thư mục xuất" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="CopyFailedReport_Click">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <SymbolIcon Symbol="Copy" />
+                                    <TextBlock Text="Báo cáo lỗi" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </Border>
             </Grid>

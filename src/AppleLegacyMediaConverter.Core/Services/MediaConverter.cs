@@ -30,7 +30,7 @@ public sealed class MediaConverter : IMediaConverter
                 progress,
                 cancellationToken),
             ConversionMode.ExtractAllFrames => _videoConverter.ExtractAllFramesAsync(job, progress, cancellationToken),
-            _ => throw new MediaConversionException("No conversion mode was selected.", $"Unsupported mode: {job.Mode}")
+            _ => throw new MediaConversionException("Chưa chọn chế độ chuyển đổi.", $"Chế độ chưa hỗ trợ: {job.Mode}")
         };
     }
 }

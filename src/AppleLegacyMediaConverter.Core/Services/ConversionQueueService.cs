@@ -76,6 +76,7 @@ public sealed class ConversionQueueService : IConversionQueueService
 
         var total = Math.Max(1, processable.Length);
         var finishedInThisRun = 0;
+        using var videoGate = new SemaphoreSlim(options.Settings.VideoParallelConversionLimit, options.Settings.VideoParallelConversionLimit);
 
         await Parallel.ForEachAsync(
             processable,
@@ -100,7 +101,7 @@ public sealed class ConversionQueueService : IConversionQueueService
                     {
                         if (item.Status != ConversionStatus.Skipped)
                         {
-                            item.MarkSkipped("The selected conversion mode does not apply to this file.");
+                            item.MarkSkipped("Chế độ đã chọn không áp dụng cho tệp này.");
                         }
 
                         Report(item, progress, Interlocked.Increment(ref finishedInThisRun), total, 0);
@@ -119,7 +120,22 @@ public sealed class ConversionQueueService : IConversionQueueService
                         progress?.Report(new ConversionProgressUpdate(item, value, totalProgress, item.Status));
                     });
 
-                    await _mediaConverter.ConvertAsync(job, itemProgress, token).ConfigureAwait(false);
+                    if (item.MediaKind == MediaKind.Video)
+                    {
+                        await videoGate.WaitAsync(token).ConfigureAwait(false);
+                        try
+                        {
+                            await _mediaConverter.ConvertAsync(job, itemProgress, token).ConfigureAwait(false);
+                        }
+                        finally
+                        {
+                            videoGate.Release();
+                        }
+                    }
+                    else
+                    {
+                        await _mediaConverter.ConvertAsync(job, itemProgress, token).ConfigureAwait(false);
+                    }
 
                     item.MarkCompleted(job.OutputPath);
                     TryPreserveTimestamps(item.SourcePath, job.OutputPath, job.Settings);
@@ -200,7 +216,7 @@ public sealed class ConversionQueueService : IConversionQueueService
 
         if (result.ShouldSkip)
         {
-            item.MarkSkipped(result.SkipReason ?? "Skipped because the output file already exists.");
+            item.MarkSkipped(result.SkipReason ?? "Bỏ qua vì tệp đầu ra đã tồn tại.");
             return null;
         }
 
@@ -219,7 +235,7 @@ public sealed class ConversionQueueService : IConversionQueueService
             return item.MediaKind switch
             {
                 MediaKind.Image => ConversionMode.ImageConversion,
-                MediaKind.Video => ConversionMode.VideoToMp4,
+                MediaKind.Video => options.VideoConversionMode,
                 _ => null
             };
         }
@@ -259,21 +275,27 @@ public sealed class ConversionQueueService : IConversionQueueService
             return false;
         }
 
+        if (options.LivePhotoAction == LivePhotoAction.RemoveMotionKeepStill && item.MediaKind == MediaKind.Video)
+        {
+            reason = "Đã loại bỏ phần chuyển động Live Photo để chỉ giữ ảnh tĩnh nhẹ nhất.";
+            return true;
+        }
+
         if (options.LivePhotoAction == LivePhotoAction.ConvertStillOnly && item.MediaKind == MediaKind.Video)
         {
-            reason = "Skipped because this Live Photo option converts the still image only.";
+            reason = "Bỏ qua vì tùy chọn Live Photo này chỉ chuyển ảnh tĩnh.";
             return true;
         }
 
         if (options.LivePhotoAction == LivePhotoAction.ConvertVideoOnly && item.MediaKind == MediaKind.Image)
         {
-            reason = "Skipped because this Live Photo option converts the motion video only.";
+            reason = "Bỏ qua vì tùy chọn Live Photo này chỉ chuyển video chuyển động.";
             return true;
         }
 
         if (options.LivePhotoAction == LivePhotoAction.ExtractPreviewFrameFromVideo && item.MediaKind == MediaKind.Image)
         {
-            reason = "Skipped because this Live Photo option extracts a preview frame from the MOV.";
+            reason = "Bỏ qua vì tùy chọn Live Photo này tách ảnh xem trước từ tệp MOV.";
             return true;
         }
 
@@ -322,7 +344,7 @@ public sealed class ConversionQueueService : IConversionQueueService
     private static string CreateUnexpectedFailureMessage(Exception exception)
     {
         return string.IsNullOrWhiteSpace(exception.Message)
-            ? "The file could not be converted. Copy error details for the technical exception."
-            : $"The file could not be converted: {exception.Message}";
+            ? "Không thể chuyển đổi tệp. Hãy sao chép chi tiết lỗi để xem lỗi kỹ thuật."
+            : $"Không thể chuyển đổi tệp: {exception.Message}";
     }
 }

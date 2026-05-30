@@ -11,9 +11,10 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <TextBlock Text="Settings" Style="{ThemeResource TitleTextBlockStyle}" />
+            <TextBlock Text="Cài đặt" Style="{ThemeResource TitleTextBlockStyle}" />
 
             <Grid Grid.Row="1" ColumnSpacing="16">
                 <Grid.ColumnDefinitions>
@@ -23,25 +24,25 @@
 
                 <Border Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="Appearance and images" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Giao diện và ảnh" Style="{ThemeResource SubtitleTextBlockStyle}" />
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Theme" />
+                            <TextBlock Text="Giao diện" />
                             <ComboBox ItemsSource="{Binding ThemeOptions}" SelectedItem="{Binding SelectedTheme, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Default image format" />
+                            <TextBlock Text="Định dạng ảnh mặc định" />
                             <ComboBox ItemsSource="{Binding ImageFormatOptions}" SelectedItem="{Binding SelectedImageFormat, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="JPEG quality" />
+                            <TextBlock Text="Chất lượng JPEG" />
                             <Slider Minimum="1" Maximum="100" Value="{Binding JpegQuality, Mode=TwoWay}" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="PNG compression" />
+                            <TextBlock Text="Nén PNG" />
                             <NumberBox Minimum="0" Maximum="9" Value="{Binding PngCompressionLevel, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Metadata" />
+                            <TextBlock Text="Siêu dữ liệu" />
                             <ComboBox ItemsSource="{Binding MetadataOptions}" SelectedItem="{Binding SelectedMetadataBehavior, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </StackPanel>
@@ -49,17 +50,27 @@
 
                 <Border Grid.Column="1" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="Batch behavior" Style="{ThemeResource SubtitleTextBlockStyle}" />
-                        <ToggleSwitch Header="Preserve timestamps" IsOn="{Binding PreserveTimestamps, Mode=TwoWay}" />
-                        <ToggleSwitch Header="Recursive folder scanning" IsOn="{Binding RecursiveFolderScanning, Mode=TwoWay}" />
-                        <ToggleSwitch Header="Keep folder structure" IsOn="{Binding KeepFolderStructure, Mode=TwoWay}" />
+                        <TextBlock Text="Xử lý hàng loạt" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <ToggleSwitch Header="Giữ ngày tạo/sửa của tệp gốc" IsOn="{Binding PreserveTimestamps, Mode=TwoWay}" />
+                        <ToggleSwitch Header="Quét thư mục con" IsOn="{Binding RecursiveFolderScanning, Mode=TwoWay}" />
+                        <ToggleSwitch Header="Giữ cấu trúc thư mục" IsOn="{Binding KeepFolderStructure, Mode=TwoWay}" />
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Filename collisions" />
+                            <TextBlock Text="Khi trùng tên tệp" />
                             <ComboBox ItemsSource="{Binding CollisionOptions}" SelectedItem="{Binding SelectedCollisionBehavior, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Parallel conversions" />
+                            <TextBlock Text="Số chuyển đổi chạy song song" />
                             <NumberBox Minimum="1" Maximum="16" Value="{Binding ParallelConversionLimit, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                            <TextBlock Text="Ảnh có thể chạy song song tốt hơn video. Đặt quá cao sẽ làm máy chậm." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Số video chuyển cùng lúc" />
+                            <NumberBox Minimum="1" Maximum="2" Value="{Binding VideoParallelConversionLimit, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                            <TextBlock Text="Nặng CPU. Khuyên dùng 1 để máy vẫn mượt." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Live Photo mặc định" />
+                            <ComboBox ItemsSource="{Binding LivePhotoActionOptions}" SelectedItem="{Binding SelectedLivePhotoAction, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                         </StackPanel>
                     </StackPanel>
                 </Border>
@@ -73,7 +84,7 @@
 
                 <Border Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="Resize" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Kích thước ảnh" Style="{ThemeResource SubtitleTextBlockStyle}" />
                         <ComboBox ItemsSource="{Binding ResizeOptions}" SelectedItem="{Binding SelectedResizeMode, Mode=TwoWay}" HorizontalAlignment="Stretch" />
                         <Grid ColumnSpacing="12">
                             <Grid.ColumnDefinitions>
@@ -81,11 +92,11 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Max width" />
+                                <TextBlock Text="Chiều rộng tối đa" />
                                 <NumberBox Minimum="1" Maximum="20000" Value="{Binding MaxWidth, Mode=TwoWay}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Spacing="6">
-                                <TextBlock Text="Max height" />
+                                <TextBlock Text="Chiều cao tối đa" />
                                 <NumberBox Minimum="1" Maximum="20000" Value="{Binding MaxHeight, Mode=TwoWay}" />
                             </StackPanel>
                         </Grid>
@@ -95,11 +106,11 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <StackPanel Spacing="6">
-                                <TextBlock Text="Custom width" />
+                                <TextBlock Text="Chiều rộng tùy chỉnh" />
                                 <NumberBox Minimum="1" Maximum="20000" Value="{Binding CustomWidth, Mode=TwoWay}" />
                             </StackPanel>
                             <StackPanel Grid.Column="1" Spacing="6">
-                                <TextBlock Text="Custom height" />
+                                <TextBlock Text="Chiều cao tùy chỉnh" />
                                 <NumberBox Minimum="1" Maximum="20000" Value="{Binding CustomHeight, Mode=TwoWay}" />
                             </StackPanel>
                         </Grid>
@@ -108,9 +119,9 @@
 
                 <Border Grid.Column="1" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                     <StackPanel Spacing="16">
-                        <TextBlock Text="Backends and logs" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                        <TextBlock Text="Backend và nhật ký" Style="{ThemeResource SubtitleTextBlockStyle}" />
                         <StackPanel Spacing="6">
-                            <TextBlock Text="FFmpeg path" />
+                            <TextBlock Text="Đường dẫn FFmpeg" />
                             <Grid ColumnSpacing="8">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="*" />
@@ -122,24 +133,54 @@
                                 </Button>
                             </Grid>
                         </StackPanel>
+                        <Grid ColumnSpacing="12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="6">
+                                <TextBlock Text="Preset tốc độ video" />
+                                <ComboBox ItemsSource="{Binding VideoPresetOptions}" SelectedItem="{Binding SelectedVideoPreset, Mode=TwoWay}" HorizontalAlignment="Stretch" />
+                            </StackPanel>
+                            <StackPanel Grid.Column="1" Spacing="6">
+                                <TextBlock Text="Luồng FFmpeg" />
+                                <NumberBox Minimum="1" Maximum="16" Value="{Binding FFmpegThreadCount, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                            </StackPanel>
+                        </Grid>
                         <StackPanel Spacing="6">
-                            <TextBlock Text="Logs location" />
+                            <TextBlock Text="Chất lượng video CRF" />
+                            <NumberBox Minimum="18" Maximum="30" Value="{Binding VideoConstantRateFactor, Mode=TwoWay}" SpinButtonPlacementMode="Inline" />
+                            <TextBlock Text="CRF thấp hơn = đẹp hơn nhưng file lớn hơn. CRF cao hơn = file nhỏ hơn nhưng giảm chất lượng." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Vị trí nhật ký" />
                             <TextBox Text="{Binding LogsLocation}" IsReadOnly="True" />
                         </StackPanel>
                         <Button Click="OpenLogs_Click">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <SymbolIcon Symbol="OpenLocal" />
-                                <TextBlock Text="Open Logs" />
+                                <TextBlock Text="Mở nhật ký" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
                 </Border>
             </Grid>
 
-            <Button Grid.Row="3" Command="{Binding ResetSettingsCommand}" HorizontalAlignment="Left">
+            <Border Grid.Row="3" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Recommended presets" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Cân bằng, khuyên dùng: preset veryfast, CRF 23, 1 video cùng lúc, 2-4 luồng FFmpeg." TextWrapping="Wrap" />
+                    <TextBlock Text="Nhanh hơn nhưng file lớn hơn: preset superfast hoặc ultrafast, CRF 23-25, 1 video cùng lúc." TextWrapping="Wrap" />
+                    <TextBlock Text="File nhỏ hơn nhưng chậm hơn: preset medium, CRF 24-26, 1 video cùng lúc, 2-4 luồng FFmpeg." TextWrapping="Wrap" />
+                    <TextBlock Text="Chất lượng cao nhưng file lớn: preset fast hoặc medium, CRF 18-21." TextWrapping="Wrap" />
+                    <TextBlock Text="Rất nặng: tách toàn bộ khung hình, nhiều video cùng lúc, hoặc FFmpeg threads đặt quá cao." Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
+                </StackPanel>
+            </Border>
+
+            <Button Grid.Row="4" Command="{Binding ResetSettingsCommand}" HorizontalAlignment="Left">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <SymbolIcon Symbol="Undo" />
-                    <TextBlock Text="Reset settings" />
+                    <TextBlock Text="Đặt lại cài đặt" />
                 </StackPanel>
             </Button>
         </Grid>

@@ -27,7 +27,7 @@ public sealed class MediaFileItem : INotifyPropertyChanged
         if (!isSupported)
         {
             _status = ConversionStatus.Skipped;
-            _errorMessage = skipReason ?? "This file type is not supported.";
+            _errorMessage = skipReason ?? "Loại tệp này chưa được hỗ trợ.";
         }
     }
 
@@ -53,13 +53,31 @@ public sealed class MediaFileItem : INotifyPropertyChanged
 
     public string? PairedLivePhotoPath { get; set; }
 
-    public string OutputTarget => OutputPath is null ? "Not converted yet" : Path.GetFileName(OutputPath);
+    public string OutputTarget => OutputPath is null ? "Chưa chuyển đổi" : Path.GetFileName(OutputPath);
 
     public ConversionStatus Status
     {
         get => _status;
-        private set => SetField(ref _status, value);
+        private set
+        {
+            if (SetField(ref _status, value))
+            {
+                OnPropertyChanged(nameof(StatusText));
+            }
+        }
     }
+
+    public string StatusText => Status switch
+    {
+        ConversionStatus.Pending => "Đang chờ",
+        ConversionStatus.Scanning => "Đang quét",
+        ConversionStatus.Converting => "Đang chuyển",
+        ConversionStatus.Completed => "Hoàn tất",
+        ConversionStatus.Failed => "Lỗi",
+        ConversionStatus.Skipped => "Bỏ qua",
+        ConversionStatus.Cancelled => "Đã hủy",
+        _ => Status.ToString()
+    };
 
     public double Progress
     {
@@ -173,7 +191,7 @@ public sealed class MediaFileItem : INotifyPropertyChanged
     {
         Progress = 0;
         Status = ConversionStatus.Cancelled;
-        ErrorMessage = "Conversion was cancelled.";
+        ErrorMessage = "Đã hủy chuyển đổi.";
     }
 
     private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)

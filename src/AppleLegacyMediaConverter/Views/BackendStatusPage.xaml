@@ -19,19 +19,19 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Spacing="4">
-                <TextBlock Text="Backend status" Style="{ThemeResource TitleTextBlockStyle}" />
+                <TextBlock Text="Trạng thái backend" Style="{ThemeResource TitleTextBlockStyle}" />
                 <TextBlock Text="{Binding StatusHeadline}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
             </StackPanel>
             <Button Grid.Column="1" Command="{Binding RefreshCommand}">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <SymbolIcon Symbol="Refresh" />
-                    <TextBlock Text="Refresh" />
+                    <TextBlock Text="Làm mới" />
                 </StackPanel>
             </Button>
             <Button Grid.Column="2" Click="CopyDiagnostics_Click">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <SymbolIcon Symbol="Copy" />
-                    <TextBlock Text="Copy diagnostic info" />
+                    <TextBlock Text="Sao chép chẩn đoán" />
                 </StackPanel>
             </Button>
         </Grid>
@@ -52,7 +52,7 @@
 
             <Border Grid.Column="1" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="10">
-                    <TextBlock Text="Image backend" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Backend ảnh" Style="{ThemeResource SubtitleTextBlockStyle}" />
                     <TextBlock Text="{Binding Status.ImageBackendMessage}" TextWrapping="Wrap" />
                 </StackPanel>
             </Border>
@@ -66,19 +66,19 @@
             </Grid.ColumnDefinitions>
             <Border Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Image inputs" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Ảnh đầu vào" Style="{ThemeResource SubtitleTextBlockStyle}" />
                     <ItemsControl ItemsSource="{Binding Status.SupportedImageInputs}" />
                 </StackPanel>
             </Border>
             <Border Grid.Column="1" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Video inputs" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Video đầu vào" Style="{ThemeResource SubtitleTextBlockStyle}" />
                     <ItemsControl ItemsSource="{Binding Status.SupportedVideoInputs}" />
                 </StackPanel>
             </Border>
             <Border Grid.Column="2" Padding="20" CornerRadius="8" BorderThickness="1" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
                 <StackPanel Spacing="8">
-                    <TextBlock Text="Outputs" Style="{ThemeResource SubtitleTextBlockStyle}" />
+                    <TextBlock Text="Đầu ra" Style="{ThemeResource SubtitleTextBlockStyle}" />
                     <ItemsControl ItemsSource="{Binding Status.SupportedOutputs}" />
                 </StackPanel>
             </Border>

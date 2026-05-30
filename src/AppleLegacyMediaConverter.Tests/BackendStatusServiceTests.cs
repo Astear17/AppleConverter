@@ -14,7 +14,7 @@ public sealed class BackendStatusServiceTests
         var status = await service.GetStatusAsync(new AppSettings { FFmpegPath = @"C:\Missing\ffmpeg.exe" });
 
         Assert.False(status.FFmpegFound);
-        Assert.Contains("FFmpeg was not found", status.FFmpegMessage);
+        Assert.Contains("Không tìm thấy FFmpeg", status.FFmpegMessage);
     }
 
     private sealed class MissingFileSystem : IFileSystemService

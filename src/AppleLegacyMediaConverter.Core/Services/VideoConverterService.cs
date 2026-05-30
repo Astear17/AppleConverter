@@ -37,9 +37,11 @@ public sealed partial class VideoConverterService : IVideoConverterService
             "-pix_fmt",
             "yuv420p",
             "-preset",
-            "medium",
+            job.Settings.VideoEncoderPreset,
             "-crf",
-            "20",
+            job.Settings.VideoConstantRateFactor.ToString(CultureInfo.InvariantCulture),
+            "-threads:v",
+            job.Settings.FFmpegThreadCount.ToString(CultureInfo.InvariantCulture),
             "-c:a",
             "aac",
             "-movflags",
@@ -64,6 +66,8 @@ public sealed partial class VideoConverterService : IVideoConverterService
             job.SourceItem.SourcePath,
             "-frames:v",
             "1",
+            "-threads:v",
+            job.Settings.FFmpegThreadCount.ToString(CultureInfo.InvariantCulture),
             "-q:v",
             "2",
             job.OutputPath
@@ -88,6 +92,8 @@ public sealed partial class VideoConverterService : IVideoConverterService
             job.SourceItem.SourcePath,
             "-vf",
             $"fps=1/{seconds}",
+            "-threads:v",
+            job.Settings.FFmpegThreadCount.ToString(CultureInfo.InvariantCulture),
             "-q:v",
             "2",
             job.OutputPath
@@ -108,6 +114,8 @@ public sealed partial class VideoConverterService : IVideoConverterService
             "-y",
             "-i",
             job.SourceItem.SourcePath,
+            "-threads:v",
+            job.Settings.FFmpegThreadCount.ToString(CultureInfo.InvariantCulture),
             "-q:v",
             "2",
             job.OutputPath
@@ -126,8 +134,8 @@ public sealed partial class VideoConverterService : IVideoConverterService
         if (ffmpegPath is null)
         {
             throw new MediaConversionException(
-                "FFmpeg is missing. Set the FFmpeg path in Settings or place ffmpeg.exe in the app tools folder.",
-                "FFmpeg path lookup failed.");
+                "Thiếu FFmpeg. Hãy đặt đường dẫn FFmpeg trong Cài đặt hoặc đặt ffmpeg.exe vào thư mục tools của ứng dụng.",
+                "Không tìm thấy đường dẫn FFmpeg.");
         }
 
         progress?.Report(2);
@@ -158,7 +166,7 @@ public sealed partial class VideoConverterService : IVideoConverterService
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
             throw new MediaConversionException(
-                "FFmpeg could not be started. Check the backend path in Settings.",
+                "Không khởi động được FFmpeg. Hãy kiểm tra đường dẫn backend trong Cài đặt.",
                 ex.ToString(),
                 ex);
         }
@@ -242,22 +250,22 @@ public sealed partial class VideoConverterService : IVideoConverterService
         var lower = stderr.ToLowerInvariant();
         if (lower.Contains("unknown encoder 'libx264'", StringComparison.Ordinal))
         {
-            return "This FFmpeg build does not include the H.264 encoder needed for compatible MP4 output.";
+            return "Bản FFmpeg này thiếu bộ mã hóa H.264 cần cho MP4 tương thích.";
         }
 
         if (lower.Contains("permission denied", StringComparison.Ordinal))
         {
-            return "FFmpeg could not write to the output folder. Check folder permissions or choose another output folder.";
+            return "FFmpeg không ghi được vào thư mục đầu ra. Hãy kiểm tra quyền thư mục hoặc chọn thư mục khác.";
         }
 
         if (lower.Contains("no space left", StringComparison.Ordinal) || lower.Contains("not enough space", StringComparison.Ordinal))
         {
-            return "The output drive does not have enough free space.";
+            return "Ổ đĩa đầu ra không còn đủ dung lượng trống.";
         }
 
         if (lower.Contains("invalid data found", StringComparison.Ordinal) || lower.Contains("moov atom not found", StringComparison.Ordinal))
         {
-            return "FFmpeg could not read this video. It may be corrupt or incomplete.";
+            return "FFmpeg không đọc được video này. Tệp có thể bị hỏng hoặc chưa đầy đủ.";
         }
 
         var lastUsefulLine = stderr
@@ -268,8 +276,8 @@ public sealed partial class VideoConverterService : IVideoConverterService
                 !line.StartsWith("size=", StringComparison.OrdinalIgnoreCase));
 
         return string.IsNullOrWhiteSpace(lastUsefulLine)
-            ? "FFmpeg could not convert this video. Copy error details for the full backend log."
-            : $"FFmpeg could not convert this video: {lastUsefulLine}";
+            ? "FFmpeg không chuyển được video này. Hãy sao chép chi tiết lỗi để xem log backend đầy đủ."
+            : $"FFmpeg không chuyển được video này: {lastUsefulLine}";
     }
 
     private static string FormatArguments(IReadOnlyList<string> arguments)

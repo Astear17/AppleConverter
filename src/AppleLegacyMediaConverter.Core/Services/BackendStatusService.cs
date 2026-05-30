@@ -21,14 +21,14 @@ public sealed class BackendStatusService : IBackendStatusService
         var ffmpegFound = ffmpegPath is not null;
         var message = ffmpegFound
             ? await GetFFmpegVersionAsync(ffmpegPath!, cancellationToken).ConfigureAwait(false)
-            : "FFmpeg was not found. Set a path in Settings or place ffmpeg.exe in tools\\ffmpeg next to the app.";
+            : "Không tìm thấy FFmpeg. Hãy đặt đường dẫn trong Cài đặt hoặc đặt ffmpeg.exe vào tools\\ffmpeg cạnh ứng dụng.";
 
         return new BackendStatus(
             ffmpegFound,
             ffmpegPath,
             message,
             ImageBackendAvailable: true,
-            ImageBackendMessage: "Magick.NET is available for image conversion. HEIC/HEIF depends on bundled ImageMagick delegate support.",
+            ImageBackendMessage: "Magick.NET đã sẵn sàng để chuyển ảnh. HEIC/HEIF phụ thuộc vào delegate ImageMagick được đóng gói.",
             _fileDetection.SupportedImageExtensions.OrderBy(static value => value).ToArray(),
             _fileDetection.SupportedVideoExtensions.OrderBy(static value => value).ToArray(),
             new[] { ".jpg", ".jpeg", ".png", ".mp4" });
@@ -90,11 +90,11 @@ public sealed class BackendStatusService : IBackendStatusService
             var firstLine = output.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault()
                 ?? error.Split('\n', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 
-            return firstLine?.Trim() ?? "FFmpeg was found, but no version output was returned.";
+            return firstLine?.Trim() ?? "Đã tìm thấy FFmpeg nhưng không đọc được thông tin phiên bản.";
         }
         catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            return $"FFmpeg was found, but version detection failed: {ex.Message}";
+            return $"Đã tìm thấy FFmpeg nhưng kiểm tra phiên bản thất bại: {ex.Message}";
         }
     }
 }

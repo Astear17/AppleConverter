@@ -46,12 +46,12 @@
             </NavigationView.Header>
 
             <NavigationView.MenuItems>
-                <NavigationViewItem x:Name="ConvertNavItem" Content="Convert" Tag="convert">
+                <NavigationViewItem x:Name="ConvertNavItem" Content="Chuyển đổi" Tag="convert">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Upload" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="Backend status" Tag="backend">
+                <NavigationViewItem Content="Trạng thái backend" Tag="backend">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Repair" />
                     </NavigationViewItem.Icon>
@@ -59,12 +59,12 @@
             </NavigationView.MenuItems>
 
             <NavigationView.FooterMenuItems>
-                <NavigationViewItem Content="Settings" Tag="settings">
+                <NavigationViewItem Content="Cài đặt" Tag="settings">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Setting" />
                     </NavigationViewItem.Icon>
                 </NavigationViewItem>
-                <NavigationViewItem Content="About" Tag="about">
+                <NavigationViewItem Content="Giới thiệu" Tag="about">
                     <NavigationViewItem.Icon>
                         <SymbolIcon Symbol="Help" />
                     </NavigationViewItem.Icon>

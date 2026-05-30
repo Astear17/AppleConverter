@@ -16,14 +16,14 @@ public sealed record BackendStatus(
     {
         return string.Join(
             Environment.NewLine,
-            "Apple Converter diagnostics",
-            $"FFmpeg found: {FFmpegFound}",
-            $"FFmpeg path: {FFmpegPath ?? "(not set)"}",
-            $"FFmpeg status: {FFmpegMessage}",
-            $"Image backend: {(ImageBackendAvailable ? "Available" : "Missing")}",
-            $"Image backend status: {ImageBackendMessage}",
-            $"Image inputs: {string.Join(", ", SupportedImageInputs)}",
-            $"Video inputs: {string.Join(", ", SupportedVideoInputs)}",
-            $"Outputs: {string.Join(", ", SupportedOutputs)}");
+            "Chẩn đoán Apple Converter",
+            $"Tìm thấy FFmpeg: {FFmpegFound}",
+            $"Đường dẫn FFmpeg: {FFmpegPath ?? "(chưa đặt)"}",
+            $"Trạng thái FFmpeg: {FFmpegMessage}",
+            $"Backend ảnh: {(ImageBackendAvailable ? "Sẵn sàng" : "Thiếu")}",
+            $"Trạng thái backend ảnh: {ImageBackendMessage}",
+            $"Ảnh đầu vào: {string.Join(", ", SupportedImageInputs)}",
+            $"Video đầu vào: {string.Join(", ", SupportedVideoInputs)}",
+            $"Đầu ra: {string.Join(", ", SupportedOutputs)}");
     }
 }

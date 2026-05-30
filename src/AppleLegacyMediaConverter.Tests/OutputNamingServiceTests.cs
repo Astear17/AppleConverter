@@ -47,7 +47,7 @@ public sealed class OutputNamingServiceTests
             });
 
         Assert.True(result.ShouldSkip);
-        Assert.Contains("already exists", result.SkipReason);
+        Assert.Contains("đã tồn tại", result.SkipReason);
     }
 
     [Fact]

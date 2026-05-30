@@ -22,9 +22,9 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         ThemeOptions = new[]
         {
-            new OptionItem<AppTheme>("System", AppTheme.System),
-            new OptionItem<AppTheme>("Light", AppTheme.Light),
-            new OptionItem<AppTheme>("Dark", AppTheme.Dark)
+            new OptionItem<AppTheme>("Theo hệ thống", AppTheme.System),
+            new OptionItem<AppTheme>("Sáng", AppTheme.Light),
+            new OptionItem<AppTheme>("Tối", AppTheme.Dark)
         };
 
         ImageFormatOptions = new[]
@@ -36,23 +36,42 @@ public sealed partial class SettingsViewModel : ObservableObject
 
         MetadataOptions = new[]
         {
-            new OptionItem<MetadataBehavior>("Preserve metadata", MetadataBehavior.PreserveWhenPossible),
-            new OptionItem<MetadataBehavior>("Strip metadata", MetadataBehavior.StripForPrivacy)
+            new OptionItem<MetadataBehavior>("Giữ metadata khi có thể", MetadataBehavior.PreserveWhenPossible),
+            new OptionItem<MetadataBehavior>("Xóa metadata để riêng tư", MetadataBehavior.StripForPrivacy)
         };
 
         CollisionOptions = new[]
         {
-            new OptionItem<CollisionBehavior>("Auto rename", CollisionBehavior.AutoRename),
-            new OptionItem<CollisionBehavior>("Overwrite", CollisionBehavior.Overwrite),
-            new OptionItem<CollisionBehavior>("Skip", CollisionBehavior.Skip)
+            new OptionItem<CollisionBehavior>("Tự đổi tên", CollisionBehavior.AutoRename),
+            new OptionItem<CollisionBehavior>("Ghi đè", CollisionBehavior.Overwrite),
+            new OptionItem<CollisionBehavior>("Bỏ qua", CollisionBehavior.Skip)
         };
 
         ResizeOptions = new[]
         {
-            new OptionItem<ResizeMode>("Original size", ResizeMode.OriginalSize),
-            new OptionItem<ResizeMode>("Max width", ResizeMode.MaxWidth),
-            new OptionItem<ResizeMode>("Max height", ResizeMode.MaxHeight),
-            new OptionItem<ResizeMode>("Custom width and height", ResizeMode.CustomWidthAndHeight)
+            new OptionItem<ResizeMode>("Giữ kích thước gốc", ResizeMode.OriginalSize),
+            new OptionItem<ResizeMode>("Giới hạn chiều rộng", ResizeMode.MaxWidth),
+            new OptionItem<ResizeMode>("Giới hạn chiều cao", ResizeMode.MaxHeight),
+            new OptionItem<ResizeMode>("Chiều rộng và chiều cao tùy chỉnh", ResizeMode.CustomWidthAndHeight)
+        };
+
+        LivePhotoActionOptions = new[]
+        {
+            new OptionItem<LivePhotoAction>("Loại bỏ Live Photo, chỉ giữ ảnh tĩnh nhẹ nhất", LivePhotoAction.RemoveMotionKeepStill),
+            new OptionItem<LivePhotoAction>("Chuyển cả ảnh và video", LivePhotoAction.ConvertBoth),
+            new OptionItem<LivePhotoAction>("Chỉ ảnh tĩnh", LivePhotoAction.ConvertStillOnly),
+            new OptionItem<LivePhotoAction>("Chỉ video chuyển động", LivePhotoAction.ConvertVideoOnly),
+            new OptionItem<LivePhotoAction>("Tách ảnh xem trước từ MOV", LivePhotoAction.ExtractPreviewFrameFromVideo)
+        };
+
+        VideoPresetOptions = new[]
+        {
+            new OptionItem<string>("Very fast (khuyên dùng)", "veryfast"),
+            new OptionItem<string>("Super fast (nhanh hơn, file lớn hơn)", "superfast"),
+            new OptionItem<string>("Ultra fast (nhanh nhất, file lớn nhất)", "ultrafast"),
+            new OptionItem<string>("Faster", "faster"),
+            new OptionItem<string>("Fast", "fast"),
+            new OptionItem<string>("Medium (nhỏ hơn, chậm hơn)", "medium")
         };
 
         _suppressSave = true;
@@ -61,12 +80,18 @@ public sealed partial class SettingsViewModel : ObservableObject
         SelectedMetadataBehavior = MetadataOptions.First(option => option.Value == Settings.MetadataBehavior);
         SelectedCollisionBehavior = CollisionOptions.First(option => option.Value == Settings.CollisionBehavior);
         SelectedResizeMode = ResizeOptions.First(option => option.Value == Settings.ResizeMode);
+        SelectedLivePhotoAction = LivePhotoActionOptions.First(option => option.Value == Settings.LivePhotoAction);
+        SelectedVideoPreset = VideoPresetOptions.FirstOrDefault(option => option.Value == Settings.VideoEncoderPreset)
+            ?? VideoPresetOptions[0];
         JpegQuality = Settings.JpegQuality;
         PngCompressionLevel = Settings.PngCompressionLevel;
         PreserveTimestamps = Settings.PreserveTimestamps;
         RecursiveFolderScanning = Settings.RecursiveFolderScanning;
         KeepFolderStructure = Settings.KeepFolderStructure;
         ParallelConversionLimit = Settings.ParallelConversionLimit;
+        VideoParallelConversionLimit = Settings.VideoParallelConversionLimit;
+        FFmpegThreadCount = Settings.FFmpegThreadCount;
+        VideoConstantRateFactor = Settings.VideoConstantRateFactor;
         FFmpegPath = Settings.FFmpegPath;
         MaxWidth = Settings.MaxWidth ?? 1920;
         MaxHeight = Settings.MaxHeight ?? 1080;
@@ -89,6 +114,10 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     public IReadOnlyList<OptionItem<ResizeMode>> ResizeOptions { get; }
 
+    public IReadOnlyList<OptionItem<LivePhotoAction>> LivePhotoActionOptions { get; }
+
+    public IReadOnlyList<OptionItem<string>> VideoPresetOptions { get; }
+
     [ObservableProperty]
     private OptionItem<AppTheme> _selectedTheme = null!;
 
@@ -103,6 +132,12 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private OptionItem<ResizeMode> _selectedResizeMode = null!;
+
+    [ObservableProperty]
+    private OptionItem<LivePhotoAction> _selectedLivePhotoAction = null!;
+
+    [ObservableProperty]
+    private OptionItem<string> _selectedVideoPreset = null!;
 
     [ObservableProperty]
     private int _jpegQuality;
@@ -121,6 +156,15 @@ public sealed partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty]
     private int _parallelConversionLimit;
+
+    [ObservableProperty]
+    private int _videoParallelConversionLimit;
+
+    [ObservableProperty]
+    private int _fFmpegThreadCount;
+
+    [ObservableProperty]
+    private int _videoConstantRateFactor;
 
     [ObservableProperty]
     private string? _fFmpegPath;
@@ -167,6 +211,18 @@ public sealed partial class SettingsViewModel : ObservableObject
         SaveFireAndForget();
     }
 
+    partial void OnSelectedLivePhotoActionChanged(OptionItem<LivePhotoAction> value)
+    {
+        Settings.LivePhotoAction = value.Value;
+        SaveFireAndForget();
+    }
+
+    partial void OnSelectedVideoPresetChanged(OptionItem<string> value)
+    {
+        Settings.VideoEncoderPreset = value.Value;
+        SaveFireAndForget();
+    }
+
     partial void OnJpegQualityChanged(int value)
     {
         Settings.JpegQuality = value;
@@ -200,6 +256,24 @@ public sealed partial class SettingsViewModel : ObservableObject
     partial void OnParallelConversionLimitChanged(int value)
     {
         Settings.ParallelConversionLimit = value;
+        SaveFireAndForget();
+    }
+
+    partial void OnVideoParallelConversionLimitChanged(int value)
+    {
+        Settings.VideoParallelConversionLimit = value;
+        SaveFireAndForget();
+    }
+
+    partial void OnFFmpegThreadCountChanged(int value)
+    {
+        Settings.FFmpegThreadCount = value;
+        SaveFireAndForget();
+    }
+
+    partial void OnVideoConstantRateFactorChanged(int value)
+    {
+        Settings.VideoConstantRateFactor = value;
         SaveFireAndForget();
     }
 
@@ -244,6 +318,7 @@ public sealed partial class SettingsViewModel : ObservableObject
         _suppressSave = true;
         Settings.Theme = defaults.Theme;
         Settings.DefaultImageOutputFormat = defaults.DefaultImageOutputFormat;
+        Settings.DefaultVideoConversionMode = defaults.DefaultVideoConversionMode;
         Settings.JpegQuality = defaults.JpegQuality;
         Settings.PngCompressionLevel = defaults.PngCompressionLevel;
         Settings.MetadataBehavior = defaults.MetadataBehavior;
@@ -252,6 +327,11 @@ public sealed partial class SettingsViewModel : ObservableObject
         Settings.KeepFolderStructure = defaults.KeepFolderStructure;
         Settings.CollisionBehavior = defaults.CollisionBehavior;
         Settings.ParallelConversionLimit = defaults.ParallelConversionLimit;
+        Settings.VideoParallelConversionLimit = defaults.VideoParallelConversionLimit;
+        Settings.FFmpegThreadCount = defaults.FFmpegThreadCount;
+        Settings.VideoEncoderPreset = defaults.VideoEncoderPreset;
+        Settings.VideoConstantRateFactor = defaults.VideoConstantRateFactor;
+        Settings.LivePhotoAction = defaults.LivePhotoAction;
         Settings.FFmpegPath = defaults.FFmpegPath;
         Settings.ResizeMode = defaults.ResizeMode;
         Settings.MaxWidth = defaults.MaxWidth;
@@ -264,12 +344,17 @@ public sealed partial class SettingsViewModel : ObservableObject
         SelectedMetadataBehavior = MetadataOptions.First(option => option.Value == Settings.MetadataBehavior);
         SelectedCollisionBehavior = CollisionOptions.First(option => option.Value == Settings.CollisionBehavior);
         SelectedResizeMode = ResizeOptions.First(option => option.Value == Settings.ResizeMode);
+        SelectedLivePhotoAction = LivePhotoActionOptions.First(option => option.Value == Settings.LivePhotoAction);
+        SelectedVideoPreset = VideoPresetOptions.First(option => option.Value == Settings.VideoEncoderPreset);
         JpegQuality = Settings.JpegQuality;
         PngCompressionLevel = Settings.PngCompressionLevel;
         PreserveTimestamps = Settings.PreserveTimestamps;
         RecursiveFolderScanning = Settings.RecursiveFolderScanning;
         KeepFolderStructure = Settings.KeepFolderStructure;
         ParallelConversionLimit = Settings.ParallelConversionLimit;
+        VideoParallelConversionLimit = Settings.VideoParallelConversionLimit;
+        FFmpegThreadCount = Settings.FFmpegThreadCount;
+        VideoConstantRateFactor = Settings.VideoConstantRateFactor;
         FFmpegPath = Settings.FFmpegPath;
         MaxWidth = Settings.MaxWidth ?? 1920;
         MaxHeight = Settings.MaxHeight ?? 1080;

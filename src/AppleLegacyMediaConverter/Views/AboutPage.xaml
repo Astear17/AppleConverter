@@ -22,6 +22,7 @@
                 <TextBlock Text="{Binding GitHubLink}" />
                 <TextBlock Text="{Binding License}" />
                 <TextBlock Text="{Binding BackendInfo}" TextWrapping="Wrap" />
+                <TextBlock Text="Nhật ký" FontWeight="SemiBold" />
                 <TextBlock Text="{Binding LogsLocation}" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextWrapping="Wrap" />
             </StackPanel>
         </Border>

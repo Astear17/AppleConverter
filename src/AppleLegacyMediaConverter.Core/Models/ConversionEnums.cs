@@ -37,6 +37,7 @@ public enum ConversionStatus
 
 public enum LivePhotoAction
 {
+    RemoveMotionKeepStill,
     ConvertBoth,
     ConvertStillOnly,
     ConvertVideoOnly,

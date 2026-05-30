@@ -1,5 +1,6 @@
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using AppleLegacyMediaConverter.Core.Interfaces;
@@ -42,42 +43,42 @@ public sealed partial class ConvertViewModel : ObservableObject
             new OptionItem<OutputFormat>("PNG", OutputFormat.Png)
         };
 
-        ConversionModeOptions = new[]
+        VideoModeOptions = new[]
         {
-            new OptionItem<ConversionMode>("Auto mode", ConversionMode.Auto),
-            new OptionItem<ConversionMode>("Image conversion", ConversionMode.ImageConversion),
-            new OptionItem<ConversionMode>("Video to MP4", ConversionMode.VideoToMp4),
-            new OptionItem<ConversionMode>("Extract first frame", ConversionMode.ExtractFirstFrame),
-            new OptionItem<ConversionMode>("Extract frames every N seconds", ConversionMode.ExtractFramesEveryNSeconds),
-            new OptionItem<ConversionMode>("Extract all frames", ConversionMode.ExtractAllFrames)
+            new OptionItem<ConversionMode>("Video sang MP4 (nặng CPU)", ConversionMode.VideoToMp4),
+            new OptionItem<ConversionMode>("Tách khung đầu tiên", ConversionMode.ExtractFirstFrame),
+            new OptionItem<ConversionMode>("Tách khung mỗi N giây (nặng)", ConversionMode.ExtractFramesEveryNSeconds),
+            new OptionItem<ConversionMode>("Tách toàn bộ khung (rất nặng)", ConversionMode.ExtractAllFrames)
         };
 
         OutputFolderModeOptions = new[]
         {
-            new OptionItem<OutputFolderMode>("Custom output folder", OutputFolderMode.CustomFolder),
-            new OptionItem<OutputFolderMode>("Same folder as source", OutputFolderMode.SameFolderAsSource)
+            new OptionItem<OutputFolderMode>("Thư mục xuất tùy chọn", OutputFolderMode.CustomFolder),
+            new OptionItem<OutputFolderMode>("Cùng thư mục với tệp gốc", OutputFolderMode.SameFolderAsSource)
         };
 
         LivePhotoActionOptions = new[]
         {
-            new OptionItem<LivePhotoAction>("Convert both", LivePhotoAction.ConvertBoth),
-            new OptionItem<LivePhotoAction>("Still image only", LivePhotoAction.ConvertStillOnly),
-            new OptionItem<LivePhotoAction>("Motion video only", LivePhotoAction.ConvertVideoOnly),
-            new OptionItem<LivePhotoAction>("Preview frame from MOV", LivePhotoAction.ExtractPreviewFrameFromVideo)
+            new OptionItem<LivePhotoAction>("Loại bỏ Live Photo, chỉ giữ ảnh tĩnh nhẹ nhất", LivePhotoAction.RemoveMotionKeepStill),
+            new OptionItem<LivePhotoAction>("Chuyển cả ảnh và video", LivePhotoAction.ConvertBoth),
+            new OptionItem<LivePhotoAction>("Chỉ ảnh tĩnh", LivePhotoAction.ConvertStillOnly),
+            new OptionItem<LivePhotoAction>("Chỉ video chuyển động", LivePhotoAction.ConvertVideoOnly),
+            new OptionItem<LivePhotoAction>("Tách ảnh xem trước từ MOV", LivePhotoAction.ExtractPreviewFrameFromVideo)
         };
 
         FilterOptions = new[]
         {
-            new OptionItem<QueueFilter>("All", QueueFilter.All),
-            new OptionItem<QueueFilter>("Pending", QueueFilter.Pending),
-            new OptionItem<QueueFilter>("Completed", QueueFilter.Completed),
-            new OptionItem<QueueFilter>("Failed", QueueFilter.Failed),
-            new OptionItem<QueueFilter>("Skipped", QueueFilter.Skipped)
+            new OptionItem<QueueFilter>("Tất cả", QueueFilter.All),
+            new OptionItem<QueueFilter>("Đang chờ", QueueFilter.Pending),
+            new OptionItem<QueueFilter>("Hoàn tất", QueueFilter.Completed),
+            new OptionItem<QueueFilter>("Lỗi", QueueFilter.Failed),
+            new OptionItem<QueueFilter>("Bỏ qua", QueueFilter.Skipped)
         };
 
         _suppressSettingsSave = true;
         SelectedImageFormat = ImageFormatOptions.First(option => option.Value == Settings.DefaultImageOutputFormat);
-        SelectedConversionMode = ConversionModeOptions.First(option => option.Value == Settings.DefaultConversionMode);
+        SelectedVideoMode = VideoModeOptions.FirstOrDefault(option => option.Value == Settings.DefaultVideoConversionMode)
+            ?? VideoModeOptions[0];
         SelectedOutputFolderMode = OutputFolderModeOptions.First(option => option.Value == Settings.OutputFolderMode);
         SelectedLivePhotoAction = LivePhotoActionOptions.First(option => option.Value == Settings.LivePhotoAction);
         SelectedFilter = FilterOptions[0];
@@ -94,7 +95,7 @@ public sealed partial class ConvertViewModel : ObservableObject
 
     public IReadOnlyList<OptionItem<OutputFormat>> ImageFormatOptions { get; }
 
-    public IReadOnlyList<OptionItem<ConversionMode>> ConversionModeOptions { get; }
+    public IReadOnlyList<OptionItem<ConversionMode>> VideoModeOptions { get; }
 
     public IReadOnlyList<OptionItem<OutputFolderMode>> OutputFolderModeOptions { get; }
 
@@ -106,7 +107,7 @@ public sealed partial class ConvertViewModel : ObservableObject
     private OptionItem<OutputFormat> _selectedImageFormat = null!;
 
     [ObservableProperty]
-    private OptionItem<ConversionMode> _selectedConversionMode = null!;
+    private OptionItem<ConversionMode> _selectedVideoMode = null!;
 
     [ObservableProperty]
     private OptionItem<OutputFolderMode> _selectedOutputFolderMode = null!;
@@ -133,10 +134,16 @@ public sealed partial class ConvertViewModel : ObservableObject
     private double _totalProgress;
 
     [ObservableProperty]
-    private string _statusText = "Ready";
+    private string _statusText = "Sẵn sàng";
 
     [ObservableProperty]
-    private string _summaryText = "No files queued";
+    private string _summaryText = "Chưa có tệp trong hàng đợi";
+
+    [ObservableProperty]
+    private string _estimatedTimeText = "Ước tính: chưa có dữ liệu";
+
+    [ObservableProperty]
+    private string _summaryDetailText = "Chưa có lần chuyển đổi nào.";
 
     [ObservableProperty]
     private string _lastOutputFolder = AppPaths.DefaultOutputFolder;
@@ -153,9 +160,9 @@ public sealed partial class ConvertViewModel : ObservableObject
         SaveSettingsFireAndForget();
     }
 
-    partial void OnSelectedConversionModeChanged(OptionItem<ConversionMode> value)
+    partial void OnSelectedVideoModeChanged(OptionItem<ConversionMode> value)
     {
-        Settings.DefaultConversionMode = value.Value;
+        Settings.DefaultVideoConversionMode = value.Value;
         SaveSettingsFireAndForget();
     }
 
@@ -192,7 +199,7 @@ public sealed partial class ConvertViewModel : ObservableObject
     public async Task AddPathsAsync(IEnumerable<string> paths)
     {
         IsScanning = true;
-        StatusText = "Scanning files";
+        StatusText = "Đang quét tệp";
 
         try
         {
@@ -206,7 +213,7 @@ public sealed partial class ConvertViewModel : ObservableObject
 
             RefreshFilter();
             UpdateSummary();
-            StatusText = added.Count == 0 ? "No files found" : $"Added {added.Count} file(s)";
+            StatusText = added.Count == 0 ? "Không tìm thấy tệp phù hợp" : $"Đã thêm {added.Count} tệp";
         }
         finally
         {
@@ -221,9 +228,9 @@ public sealed partial class ConvertViewModel : ObservableObject
             return;
         }
 
-        if (SelectedConversionMode.Value == ConversionMode.ExtractAllFrames && !await confirmExtractAllFrames().ConfigureAwait(true))
+        if (SelectedVideoMode.Value == ConversionMode.ExtractAllFrames && !await confirmExtractAllFrames().ConfigureAwait(true))
         {
-            StatusText = "Extract all frames was cancelled";
+            StatusText = "Đã hủy tách toàn bộ khung hình";
             return;
         }
 
@@ -231,18 +238,22 @@ public sealed partial class ConvertViewModel : ObservableObject
         _conversionCancellation = new CancellationTokenSource();
         IsConverting = true;
         TotalProgress = 0;
-        StatusText = "Converting";
+        EstimatedTimeText = "Ước tính: đang tính...";
+        SummaryDetailText = "Đang chuyển đổi, vui lòng giữ ứng dụng mở.";
+        StatusText = "Đang chuyển đổi";
+        var timer = Stopwatch.StartNew();
 
         var options = new ConversionBatchOptions
         {
             Settings = Settings,
-            ConversionMode = SelectedConversionMode.Value,
+            ConversionMode = ConversionMode.Auto,
+            VideoConversionMode = SelectedVideoMode.Value,
             ImageOutputFormat = SelectedImageFormat.Value,
             OutputFolderMode = SelectedOutputFolderMode.Value,
             CustomOutputFolder = CustomOutputFolder,
             KeepFolderStructure = Settings.KeepFolderStructure,
             CollisionBehavior = Settings.CollisionBehavior,
-            LivePhotoAction = SelectedLivePhotoAction.Value,
+            LivePhotoAction = Settings.LivePhotoAction,
             FrameIntervalSeconds = FrameIntervalSeconds,
             ConfirmExtractAllFrames = true
         };
@@ -252,7 +263,7 @@ public sealed partial class ConvertViewModel : ObservableObject
             Dispatch(() =>
             {
                 TotalProgress = update.TotalProgress;
-                RefreshFilter();
+                EstimatedTimeText = CreateEstimatedTimeText(update.TotalProgress, timer.Elapsed);
             });
         });
 
@@ -264,17 +275,21 @@ public sealed partial class ConvertViewModel : ObservableObject
             TotalProgress = 100;
             LastOutputFolder = options.OutputFolderMode == OutputFolderMode.CustomFolder
                 ? options.CustomOutputFolder ?? AppPaths.DefaultOutputFolder
-                : "Same folder as source";
-            SummaryText = $"{summary.Completed} completed, {summary.Failed} failed, {summary.Skipped} skipped";
-            StatusText = summary.Failed > 0 ? "Finished with issues" : "Finished";
+                : "Cùng thư mục với tệp gốc";
+            SummaryText = $"{summary.Completed} hoàn tất, {summary.Failed} lỗi, {summary.Skipped} bỏ qua";
+            SummaryDetailText = $"Đầu ra: {LastOutputFolder}";
+            StatusText = summary.Failed > 0 ? "Hoàn tất nhưng có lỗi" : "Hoàn tất";
+            EstimatedTimeText = $"Thời gian đã chạy: {FormatDuration(timer.Elapsed)}";
             await _settingsService.SaveAsync(Settings).ConfigureAwait(true);
         }
         catch (OperationCanceledException)
         {
-            StatusText = "Cancelled";
+            StatusText = "Đã hủy";
+            EstimatedTimeText = $"Đã hủy sau {FormatDuration(timer.Elapsed)}";
         }
         finally
         {
+            timer.Stop();
             IsConverting = false;
             UpdateSummary();
             RefreshFilter();
@@ -285,7 +300,7 @@ public sealed partial class ConvertViewModel : ObservableObject
     private void CancelConversion()
     {
         _conversionCancellation?.Cancel();
-        StatusText = "Cancelling";
+        StatusText = "Đang hủy";
     }
 
     [RelayCommand]
@@ -299,8 +314,10 @@ public sealed partial class ConvertViewModel : ObservableObject
         Queue.Clear();
         FilteredQueue.Clear();
         TotalProgress = 0;
-        SummaryText = "No files queued";
-        StatusText = "Ready";
+        EstimatedTimeText = "Ước tính: chưa có dữ liệu";
+        SummaryText = "Chưa có tệp trong hàng đợi";
+        SummaryDetailText = "Chưa có lần chuyển đổi nào.";
+        StatusText = "Sẵn sàng";
         NotifyQueueDependentProperties();
     }
 
@@ -334,7 +351,7 @@ public sealed partial class ConvertViewModel : ObservableObject
         var failures = Queue.Where(static item => item.Status == ConversionStatus.Failed).ToArray();
         if (failures.Length == 0)
         {
-            return "No failed files.";
+            return "Không có tệp lỗi.";
         }
 
         return string.Join(
@@ -343,21 +360,13 @@ public sealed partial class ConvertViewModel : ObservableObject
                 Environment.NewLine,
                 item.FileName,
                 item.SourcePath,
-                item.ErrorMessage ?? "Unknown error",
-                item.TechnicalDetails ?? "No technical details.")));
+                item.ErrorMessage ?? "Lỗi không xác định",
+                item.TechnicalDetails ?? "Không có chi tiết kỹ thuật.")));
     }
 
     private void RefreshFilter()
     {
-        var filter = SelectedFilter?.Value ?? QueueFilter.All;
-        var filtered = Queue.Where(item => filter switch
-        {
-            QueueFilter.Pending => item.Status == ConversionStatus.Pending,
-            QueueFilter.Completed => item.Status == ConversionStatus.Completed,
-            QueueFilter.Failed => item.Status == ConversionStatus.Failed,
-            QueueFilter.Skipped => item.Status == ConversionStatus.Skipped,
-            _ => true
-        }).ToArray();
+        var filtered = Queue.Where(MatchesSelectedFilter).ToArray();
 
         FilteredQueue.Clear();
         foreach (var item in filtered)
@@ -372,7 +381,7 @@ public sealed partial class ConvertViewModel : ObservableObject
     {
         if (Queue.Count == 0)
         {
-            SummaryText = "No files queued";
+            SummaryText = "Chưa có tệp trong hàng đợi";
             return;
         }
 
@@ -380,7 +389,38 @@ public sealed partial class ConvertViewModel : ObservableObject
         var failed = Queue.Count(static item => item.Status == ConversionStatus.Failed);
         var skipped = Queue.Count(static item => item.Status == ConversionStatus.Skipped);
         var pending = Queue.Count(static item => item.Status == ConversionStatus.Pending);
-        SummaryText = $"{pending} pending, {completed} completed, {failed} failed, {skipped} skipped";
+        SummaryText = $"{pending} đang chờ, {completed} hoàn tất, {failed} lỗi, {skipped} bỏ qua";
+    }
+
+    private static string CreateEstimatedTimeText(double totalProgress, TimeSpan elapsed)
+    {
+        if (totalProgress < 2 || elapsed.TotalSeconds < 2)
+        {
+            return "Ước tính: đang tính...";
+        }
+
+        var remainingSeconds = elapsed.TotalSeconds * (100 - totalProgress) / totalProgress;
+        if (remainingSeconds <= 1)
+        {
+            return "Ước tính: sắp xong";
+        }
+
+        return $"Ước tính còn lại: {FormatDuration(TimeSpan.FromSeconds(remainingSeconds))}";
+    }
+
+    private static string FormatDuration(TimeSpan value)
+    {
+        if (value.TotalHours >= 1)
+        {
+            return $"{(int)value.TotalHours} giờ {value.Minutes} phút";
+        }
+
+        if (value.TotalMinutes >= 1)
+        {
+            return $"{value.Minutes} phút {value.Seconds} giây";
+        }
+
+        return $"{Math.Max(1, value.Seconds)} giây";
     }
 
     private void NotifyQueueDependentProperties()
@@ -394,9 +434,66 @@ public sealed partial class ConvertViewModel : ObservableObject
     {
         Dispatch(() =>
         {
-            UpdateSummary();
-            NotifyQueueDependentProperties();
+            if (sender is MediaFileItem item && e.PropertyName == nameof(MediaFileItem.Status))
+            {
+                UpdateFilteredMembership(item);
+                UpdateSummary();
+                NotifyQueueDependentProperties();
+                return;
+            }
+
+            if (e.PropertyName is null or nameof(MediaFileItem.OutputPath) or nameof(MediaFileItem.ErrorMessage))
+            {
+                UpdateSummary();
+                NotifyQueueDependentProperties();
+            }
         });
+    }
+
+    private void UpdateFilteredMembership(MediaFileItem item)
+    {
+        var existingIndex = FilteredQueue.IndexOf(item);
+        var shouldShow = MatchesSelectedFilter(item);
+
+        if (!shouldShow)
+        {
+            if (existingIndex >= 0)
+            {
+                FilteredQueue.RemoveAt(existingIndex);
+            }
+
+            return;
+        }
+
+        if (existingIndex >= 0)
+        {
+            return;
+        }
+
+        var queueIndex = Queue.IndexOf(item);
+        for (var index = 0; index < FilteredQueue.Count; index++)
+        {
+            if (Queue.IndexOf(FilteredQueue[index]) > queueIndex)
+            {
+                FilteredQueue.Insert(index, item);
+                return;
+            }
+        }
+
+        FilteredQueue.Add(item);
+    }
+
+    private bool MatchesSelectedFilter(MediaFileItem item)
+    {
+        var filter = SelectedFilter?.Value ?? QueueFilter.All;
+        return filter switch
+        {
+            QueueFilter.Pending => item.Status == ConversionStatus.Pending,
+            QueueFilter.Completed => item.Status == ConversionStatus.Completed,
+            QueueFilter.Failed => item.Status == ConversionStatus.Failed,
+            QueueFilter.Skipped => item.Status == ConversionStatus.Skipped,
+            _ => true
+        };
     }
 
     private void Dispatch(Action action)

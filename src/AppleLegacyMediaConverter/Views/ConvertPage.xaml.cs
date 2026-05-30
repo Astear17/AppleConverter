@@ -58,7 +58,7 @@ public sealed partial class ConvertPage : Page
     private void DropZone_DragOver(object sender, DragEventArgs e)
     {
         e.AcceptedOperation = Windows.ApplicationModel.DataTransfer.DataPackageOperation.Copy;
-        e.DragUIOverride.Caption = "Add to conversion queue";
+        e.DragUIOverride.Caption = "Thêm vào hàng đợi chuyển đổi";
     }
 
     private async void DropZone_Drop(object sender, DragEventArgs e)
@@ -86,10 +86,10 @@ public sealed partial class ConvertPage : Page
         var dialog = new ContentDialog
         {
             XamlRoot = XamlRoot,
-            Title = "Extract all frames?",
-            Content = "This can create thousands of image files for longer videos.",
-            PrimaryButtonText = "Extract frames",
-            CloseButtonText = "Cancel",
+            Title = "Tách toàn bộ khung hình?",
+            Content = "Chế độ này rất nặng và có thể tạo hàng nghìn tệp ảnh nếu video dài.",
+            PrimaryButtonText = "Tách khung hình",
+            CloseButtonText = "Hủy",
             DefaultButton = ContentDialogButton.Close
         };
 
@@ -132,8 +132,8 @@ public sealed partial class ConvertPage : Page
             Environment.NewLine,
             item.FileName,
             item.SourcePath,
-            item.ErrorMessage ?? "No user-facing error.",
-            item.TechnicalDetails ?? "No technical details.");
+            item.ErrorMessage ?? "Không có lỗi hiển thị.",
+            item.TechnicalDetails ?? "Không có chi tiết kỹ thuật.");
         var package = new DataPackage();
         package.SetText(text);
         Clipboard.SetContent(package);

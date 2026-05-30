@@ -40,8 +40,8 @@ public sealed class ImageConverterService : IImageConverterService
                         break;
                     default:
                         throw new MediaConversionException(
-                            "This output format is not valid for image conversion.",
-                            $"Image output format was {job.OutputFormat}.");
+                            "Định dạng đầu ra này không dùng được cho chuyển đổi ảnh.",
+                            $"Định dạng ảnh đầu ra là {job.OutputFormat}.");
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
@@ -53,21 +53,21 @@ public sealed class ImageConverterService : IImageConverterService
         catch (MagickException ex)
         {
             throw new MediaConversionException(
-                "The image could not be decoded. It may be corrupt or use a codec this build cannot read.",
+                "Không thể đọc ảnh. Tệp có thể bị hỏng hoặc dùng codec mà bản build này chưa đọc được.",
                 ex.ToString(),
                 ex);
         }
         catch (UnauthorizedAccessException ex)
         {
             throw new MediaConversionException(
-                "Apple Converter does not have permission to write the output file.",
+                "Apple Converter không có quyền ghi tệp đầu ra.",
                 ex.ToString(),
                 ex);
         }
         catch (IOException ex)
         {
             throw new MediaConversionException(
-                "The image could not be written. Check the output folder, disk space, and filename.",
+                "Không thể ghi ảnh. Hãy kiểm tra thư mục đầu ra, dung lượng ổ đĩa và tên tệp.",
                 ex.ToString(),
                 ex);
         }

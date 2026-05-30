@@ -4,6 +4,8 @@ Apple Converter is a modern Windows desktop app for converting Apple media files
 
 The app is built with C#, .NET 8, WinUI 3, and Windows App SDK. The core conversion logic is separated from the UI so media handling, queue behavior, naming, settings, and backend diagnostics are testable.
 
+Repository: https://github.com/Astear17/AppleConverter
+
 ## Features
 
 - Drag-and-drop files and folders into a WinUI 3 Fluent desktop interface.
@@ -14,9 +16,13 @@ The app is built with C#, .NET 8, WinUI 3, and Windows App SDK. The core convers
 - MOV/video conversion to MP4 using H.264 video and AAC audio through FFmpeg.
 - Video first-frame extraction and frame sequence extraction.
 - Live Photo pair detection for matching image and `.MOV` filenames.
+- Live Photo removal mode that keeps only the still image and skips the motion video for the smallest output.
 - Output folder selection, same-folder output, folder structure preservation, flattening, and collision behavior.
 - Settings page for theme, default formats, JPEG quality, PNG compression, metadata handling, timestamps, concurrency, folder scanning, FFmpeg path, and logs.
+- Resource-friendly video defaults: one FFmpeg encode at a time, capped FFmpeg threads, and configurable H.264 speed/quality settings.
+- Runtime time estimate while a batch is converting.
 - Backend status page with copyable diagnostics.
+- Vietnamese-first app UI for the main conversion, settings, backend, and about screens.
 - Self-contained installer packaging with bundled FFmpeg support.
 - Local JSON settings and local log files.
 - GitHub Actions build and draft release workflows.
@@ -109,6 +115,40 @@ FFmpeg binaries are not committed to this repository. `scripts\Get-FFmpeg.ps1` d
 
 The WinUI app project sets `WindowsAppSDKSelfContained=true`, and installer publishing uses `--self-contained true`, so release builds carry the Windows App SDK files and .NET runtime files beside the app executable.
 
+## Performance notes
+
+Video conversion is CPU-heavy. Apple Converter defaults to a responsive profile:
+
+- Video conversions at once: `1`
+- FFmpeg threads per video: about half the CPU cores, capped conservatively
+- H.264 preset: `veryfast`
+- CRF: `23`
+
+These can be changed in Settings. Raising video conversions or FFmpeg threads may make one short batch look faster, but it can make Windows sluggish and slow down larger batches because multiple encoders compete for CPU, disk, and thermal headroom.
+
+Frame interval means "extract one image frame every N seconds." For example, a frame interval of `5` extracts frames at 0s, 5s, 10s, 15s, and so on. This only applies to the "Extract frames every N seconds" mode.
+
+Heavy modes:
+
+- Heaviest: extract all frames, because a long video can create thousands of images.
+- Heavy: video to MP4, because H.264 encoding uses a lot of CPU.
+- Medium: extract frames every N seconds, depending on the interval and video length.
+- Light: image conversion and first-frame extraction.
+
+The Convert page separates image and video features:
+
+- Image settings apply to still-image inputs such as HEIC, HEIF, JPG, PNG, WEBP, TIFF, and BMP.
+- Video settings apply to MOV, MP4, and M4V inputs.
+- Mixed batches can therefore convert images and videos in one run without using a single shared mode that skips one category.
+
+## Recommended presets
+
+- Balanced, recommended: preset `veryfast`, CRF `23`, video conversions at once `1`, FFmpeg threads `2-4`.
+- Faster but larger files: preset `superfast` or `ultrafast`, CRF `23-25`, video conversions at once `1`.
+- Smaller files but slower: preset `medium`, CRF `24-26`, video conversions at once `1`, FFmpeg threads `2-4`.
+- Higher quality but larger files: preset `fast` or `medium`, CRF `18-21`.
+- Keep Windows responsive: leave video conversions at once on `1`; raising both video concurrency and FFmpeg threads can slow the whole batch down.
+
 ## GitHub Actions
 
 `build.yml` runs on pushes to `main`, pull requests to `main`, and manual dispatch. It restores, builds Release, runs tests, downloads FFmpeg, publishes the app self-contained, and uploads an artifact named with the app version and commit hash.
@@ -136,4 +176,4 @@ The WinUI app project sets `WindowsAppSDKSelfContained=true`, and installer publ
 
 ## License
 
-License placeholder. Choose the final license before publishing.
+MIT License. See [LICENSE](LICENSE).

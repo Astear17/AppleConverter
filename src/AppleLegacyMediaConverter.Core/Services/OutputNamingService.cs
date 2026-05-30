@@ -42,7 +42,7 @@ public sealed class OutputNamingService : IOutputNamingService
 
         if (options.CollisionBehavior == CollisionBehavior.Skip)
         {
-            return new OutputPathResult(outputPath, true, $"Skipped because {Path.GetFileName(outputPath)} already exists.");
+            return new OutputPathResult(outputPath, true, $"Bỏ qua vì {Path.GetFileName(outputPath)} đã tồn tại.");
         }
 
         return new OutputPathResult(CreateAutoRenamedPath(outputFolder, sourceBaseName, suffix, extension));
@@ -93,6 +93,6 @@ public sealed class OutputNamingService : IOutputNamingService
             }
         }
 
-        throw new IOException("Could not create a unique output filename after 9,999 attempts.");
+        throw new IOException("Không thể tạo tên tệp đầu ra duy nhất sau 9.999 lần thử.");
     }
 }

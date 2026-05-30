@@ -33,26 +33,30 @@ public sealed class FileDetectionService : IFileDetectionService
     {
         if (string.IsNullOrWhiteSpace(path))
         {
-            return new FileTypeInfo(path, string.Empty, MediaKind.Unknown, false, "Unknown", "The path is empty.");
+            return new FileTypeInfo(path, string.Empty, MediaKind.Unknown, false, "Không xác định", "Đường dẫn trống.");
         }
 
         var extension = Path.GetExtension(path).ToLowerInvariant();
         if (Images.Contains(extension))
         {
-            var displayType = extension is ".heic" or ".heif" ? "Apple HEIC/HEIF image" : $"{extension.TrimStart('.').ToUpperInvariant()} image";
+            var displayType = extension is ".heic" or ".heif"
+                ? "Ảnh Apple HEIC/HEIF"
+                : $"Ảnh {extension.TrimStart('.').ToUpperInvariant()}";
             return new FileTypeInfo(path, extension, MediaKind.Image, true, displayType);
         }
 
         if (Videos.Contains(extension))
         {
-            var displayType = extension is ".mov" ? "Apple QuickTime MOV video" : $"{extension.TrimStart('.').ToUpperInvariant()} video";
+            var displayType = extension is ".mov"
+                ? "Video Apple QuickTime MOV"
+                : $"Video {extension.TrimStart('.').ToUpperInvariant()}";
             return new FileTypeInfo(path, extension, MediaKind.Video, true, displayType);
         }
 
         var reason = string.IsNullOrEmpty(extension)
-            ? "Files without an extension are not supported."
-            : $"The {extension} file type is not supported.";
+            ? "Tệp không có phần mở rộng chưa được hỗ trợ."
+            : $"Loại tệp {extension} chưa được hỗ trợ.";
 
-        return new FileTypeInfo(path, extension, MediaKind.Unknown, false, "Unsupported file", reason);
+        return new FileTypeInfo(path, extension, MediaKind.Unknown, false, "Tệp chưa hỗ trợ", reason);
     }
 }

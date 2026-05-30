@@ -24,9 +24,9 @@ public sealed partial class BackendStatusViewModel : ObservableObject
     private bool _isRefreshing;
 
     [ObservableProperty]
-    private string _statusHeadline = "Checking backend status";
+    private string _statusHeadline = "Đang kiểm tra backend";
 
-    public string DiagnosticText => Status?.ToDiagnosticText() ?? "Backend status has not been loaded.";
+    public string DiagnosticText => Status?.ToDiagnosticText() ?? "Chưa tải trạng thái backend.";
 
     [RelayCommand]
     public async Task RefreshAsync()
@@ -36,7 +36,7 @@ public sealed partial class BackendStatusViewModel : ObservableObject
         {
             Status = await _backendStatusService.GetStatusAsync(_state.Settings).ConfigureAwait(true);
             _state.BackendStatus = Status;
-            StatusHeadline = Status.FFmpegFound ? "Video backend ready" : "Video backend missing";
+            StatusHeadline = Status.FFmpegFound ? "Backend video đã sẵn sàng" : "Thiếu backend video";
             OnPropertyChanged(nameof(DiagnosticText));
         }
         finally

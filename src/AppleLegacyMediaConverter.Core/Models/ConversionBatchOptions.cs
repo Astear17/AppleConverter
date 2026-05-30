@@ -6,6 +6,8 @@ public sealed class ConversionBatchOptions
 
     public ConversionMode ConversionMode { get; init; } = ConversionMode.Auto;
 
+    public ConversionMode VideoConversionMode { get; init; } = ConversionMode.VideoToMp4;
+
     public OutputFormat ImageOutputFormat { get; init; } = OutputFormat.Jpg;
 
     public string? CustomOutputFolder { get; init; }
